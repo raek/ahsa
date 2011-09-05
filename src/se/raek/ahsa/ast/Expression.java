@@ -28,6 +28,19 @@ public interface Expression {
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseConstant(v);
 		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Constant)) return false;
+			Constant otherConstant = (Constant) otherObject;
+			return v.equals(otherConstant.v);
+		}
+		
+		@Override
+		public int hashCode() {
+			return v.hashCode();
+		}
 
 	}
 	
@@ -51,6 +64,25 @@ public interface Expression {
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseBinaryOperation(op, left, right);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof BinaryOperation)) return false;
+			BinaryOperation otherBinOp = (BinaryOperation) otherObject;
+			return op.equals(otherBinOp.op) &&
+					left.equals(otherBinOp.left) &&
+					right.equals(otherBinOp.right);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + op.hashCode();
+			result = 31 * result + left.hashCode();
+			result = 31 * result + right.hashCode();
+			return result;
 		}
 		
 	}

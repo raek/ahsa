@@ -65,6 +65,20 @@ public interface Value {
 		public <T> T matchValue(Matcher<T> m) {
 			return m.caseNumber(n);
 		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Number)) return false;
+			Number otherNumber = (Number) otherObject;
+			return Double.compare(n, otherNumber.n) == 0;
+		}
+		
+		@Override
+		public int hashCode() {
+			long v = Double.doubleToLongBits(n);
+			return  (int)(v^(v>>>32));
+		}
 	}
 	
 	public static abstract class AbstractMatcher<T> implements Matcher<T> {
