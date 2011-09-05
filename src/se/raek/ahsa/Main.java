@@ -18,7 +18,7 @@ public class Main {
 		out.print("Expression to evaluate: ");
 		Printer.print(expr, out);
 		out.println();
-		Value result = Evaluator.eval(expr);
+		Value result = Interpreter.eval(expr, null);
 		out.print("Value: ");
 		Printer.print(result, out);
 		out.println();

@@ -5,9 +5,12 @@ import java.io.StringWriter;
 
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.BinaryOperator;
+import se.raek.ahsa.ast.Statement;
+import se.raek.ahsa.ast.ValueLocation;
+import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.runtime.Value;
 
-public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, BinaryOperator.Matcher<Void> {
+public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, BinaryOperator.Matcher<Void>, Statement.Matcher<Void> {
 	
 	private final PrintWriter writer;
 	
@@ -15,14 +18,25 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, B
 		this.writer = writer;
 	}
 	
+	public static void print(Value expr, PrintWriter writer) {
+		Printer printer = new Printer(writer);
+		expr.matchValue(printer);
+	}
+	
 	public static void print(Expression expr, PrintWriter writer) {
 		Printer printer = new Printer(writer);
 		expr.matchExpression(printer);
 	}
 	
-	public static void print(Value expr, PrintWriter writer) {
+	public static void print(Statement stmt, PrintWriter writer) {
 		Printer printer = new Printer(writer);
-		expr.matchValue(printer);
+		stmt.matchStatement(printer);
+	}
+	
+	public static String toString(Value v) {
+		StringWriter sw = new StringWriter();
+		print(v, new PrintWriter(sw));
+		return sw.toString();
 	}
 	
 	public static String toString(Expression expr) {
@@ -31,9 +45,9 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, B
 		return sw.toString();
 	}
 	
-	public static String toString(Value v) {
+	public static String toString(Statement stmt) {
 		StringWriter sw = new StringWriter();
-		print(v, new PrintWriter(sw));
+		print(stmt, new PrintWriter(sw));
 		return sw.toString();
 	}
 
@@ -58,6 +72,18 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, B
 	@Override
 	public Void caseConstant(Value v) {
 		v.matchValue(this);
+		return null;
+	}
+
+	@Override
+	public Void caseValueLookup(ValueLocation val) {
+		writer.print(val.label);
+		return null;
+	}
+
+	@Override
+	public Void caseVariableLookup(VariableLocation var) {
+		writer.print(var.label);
 		return null;
 	}
 
@@ -92,6 +118,29 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, B
 	@Override
 	public Void caseDivision() {
 		writer.print("/");
+		return null;
+	}
+
+	@Override
+	public Void caseThrowawayExpression(Expression expr) {
+		expr.matchExpression(this);
+		writer.print(";");
+		return null;
+	}
+
+	@Override
+	public Void caseValueDefinition(ValueLocation val, Expression expr) {
+		writer.printf("val %s=", val.label);
+		expr.matchExpression(this);
+		writer.print(";");
+		return null;
+	}
+
+	@Override
+	public Void caseVariableAssignment(VariableLocation var, Expression expr) {
+		writer.printf("%s=", var.label);
+		expr.matchExpression(this);
+		writer.print(";");
 		return null;
 	}
 

@@ -6,11 +6,18 @@ import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Expression.Constant;
 import se.raek.ahsa.ast.Expression.BinaryOperation;
 import se.raek.ahsa.ast.BinaryOperator;
+import se.raek.ahsa.ast.Expression.ValueLookup;
+import se.raek.ahsa.ast.Expression.VariableLookup;
 import se.raek.ahsa.runtime.Value;
 
 import org.junit.Test;
 
 public class ExpressionTest {
+	
+	private static final ValueLocation valX = new ValueLocation("x");
+	private static final ValueLocation valY = new ValueLocation("y");
+	private static final VariableLocation varX = new VariableLocation("x");
+	private static final VariableLocation varY = new VariableLocation("y");
 
 	@Test
 	public void matchConstant() {
@@ -18,6 +25,60 @@ public class ExpressionTest {
 			@Override
 			public Boolean caseConstant(Value v) {
 				return true;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseBinaryOperation(BinaryOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchValueLookup() {
+		assertTrue(ValueLookup.make(valX).matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return val.equals(valX);
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseBinaryOperation(BinaryOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchVariableLookup() {
+		assertTrue(VariableLookup.make(varX).matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return var.equals(varX);
 			}
 			@Override
 			public Boolean caseBinaryOperation(BinaryOperator op,
@@ -37,6 +98,14 @@ public class ExpressionTest {
 				return false;
 			}
 			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
 			public Boolean caseBinaryOperation(BinaryOperator op,
 					Expression left, Expression right) {
 				return true;
@@ -47,6 +116,16 @@ public class ExpressionTest {
 	@Test
 	public void equalsConstant() {
 		assertTrue(Constant.make(Value.Null.make()).equals(Constant.make(Value.Null.make())));
+	}
+	
+	@Test
+	public void equalsValueLookup() {
+		assertTrue(ValueLookup.make(valX).equals(ValueLookup.make(valX)));
+	}
+	
+	@Test
+	public void equalsVariableLookup() {
+		assertTrue(VariableLookup.make(varX).equals(VariableLookup.make(varX)));
 	}
 	
 	@Test
@@ -62,6 +141,16 @@ public class ExpressionTest {
 	public void equalHashCodeConstant() {
 		assertTrue(Constant.make(Value.Null.make()).hashCode() == Constant.make(Value.Null.make()).hashCode());
 	}
+	 
+	@Test
+	public void equalHashCodeValueLookup() {
+		assertTrue(ValueLookup.make(valX).hashCode() == ValueLookup.make(valX).hashCode());
+	}
+	 
+	@Test
+	public void equalHashCodeVariableLookup() {
+		assertTrue(VariableLookup.make(varX).hashCode() == VariableLookup.make(varX).hashCode());
+	}
 	
 	@Test
 	public void equalHashCodeBinaryOperation() {
@@ -75,6 +164,16 @@ public class ExpressionTest {
 	@Test
 	public void notEqualConstant() {
 		assertFalse(Constant.make(Value.Number.make(1.0)).equals(Constant.make(Value.Number.make(2.0))));
+	}
+	
+	@Test
+	public void notEqualValueLookup() {
+		assertFalse(ValueLookup.make(valX).equals(ValueLookup.make(valY)));
+	}
+	
+	@Test
+	public void notEqualVariableLookup() {
+		assertFalse(VariableLookup.make(varX).equals(VariableLookup.make(varY)));
 	}
 	
 	@Test

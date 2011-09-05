@@ -2,18 +2,26 @@ package se.raek.ahsa;
 
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.BinaryOperator;
-import se.raek.ahsa.ast.Expression.Matcher;
+import se.raek.ahsa.ast.Statement;
+import se.raek.ahsa.ast.ValueLocation;
+import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
 
-public class Evaluator implements Matcher<Value> {
+public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher<Void> {
 	
-	private static final Evaluator instance = new Evaluator();
+	private final Store sto;
 	
-	private Evaluator() {
+	private Interpreter(Store sto) {
+		this.sto = sto;
 	}
 	
-	public static Value eval(Expression expr) {
-		return expr.matchExpression(instance);
+	public static Value eval(Expression expr, Store sto) {
+		return expr.matchExpression(new Interpreter(sto));
+	}
+	
+	public static void execute(Statement stmt, Store sto) {
+		stmt.matchStatement(new Interpreter(sto));
 	}
 	
 	public static class CastException extends RuntimeException {
@@ -29,6 +37,16 @@ public class Evaluator implements Matcher<Value> {
 	@Override
 	public Value caseConstant(Value v) {
 		return v;
+	}
+
+	@Override
+	public Value caseValueLookup(ValueLocation val) {
+		return sto.lookupValue(val);
+	}
+
+	@Override
+	public Value caseVariableLookup(VariableLocation var) {
+		return sto.lookupVariable(var);
 	}
 
 	@Override
@@ -70,5 +88,25 @@ public class Evaluator implements Matcher<Value> {
 		});
 		
 		return Value.Number.make(result);
+	}
+
+	@Override
+	public Void caseThrowawayExpression(Expression expr) {
+		expr.matchExpression(this); // Expression value is thrown away
+		return null;
+	}
+
+	@Override
+	public Void caseValueDefinition(ValueLocation val, Expression expr) {
+		Value result = expr.matchExpression(this);
+		sto.defineValue(val, result);
+		return null;
+	}
+
+	@Override
+	public Void caseVariableAssignment(VariableLocation var, Expression expr) {
+		Value result = expr.matchExpression(this);
+		sto.assignVariable(var, result);
+		return null;
 	}
 }

@@ -8,6 +8,8 @@ public interface Expression {
 	
 	public interface Matcher<T> {
 		T caseConstant(Value v);
+		T caseValueLookup(ValueLocation val);
+		T caseVariableLookup(VariableLocation var);
 		T caseBinaryOperation(BinaryOperator op, Expression left, Expression right);
 	}
 	
@@ -42,6 +44,72 @@ public interface Expression {
 			return v.hashCode();
 		}
 
+	}
+	
+	public static final class ValueLookup implements Expression {
+		
+		public final ValueLocation val;
+		
+		private ValueLookup(ValueLocation val) {
+			if (val == null) throw new NullPointerException();
+			this.val = val;
+		}
+		
+		public static ValueLookup make(ValueLocation val) {
+			return new ValueLookup(val);
+		}
+		
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseValueLookup(val);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			 if (this == otherObject) return true;
+			 if (!(otherObject instanceof ValueLookup)) return false;
+			 ValueLookup otherLookup = (ValueLookup) otherObject;
+			 return val.equals(otherLookup.val);
+		}
+		
+		@Override
+		public int hashCode() {
+			return val.hashCode();
+		}
+		
+	}
+	
+	public static final class VariableLookup implements Expression {
+		
+		public final VariableLocation var;
+		
+		private VariableLookup(VariableLocation var) {
+			if (var == null) throw new NullPointerException();
+			this.var = var;
+		}
+		
+		public static VariableLookup make(VariableLocation var) {
+			return new VariableLookup(var);
+		}
+		
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseVariableLookup(var);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			 if (this == otherObject) return true;
+			 if (!(otherObject instanceof VariableLookup)) return false;
+			 VariableLookup otherLookup = (VariableLookup) otherObject;
+			 return var.equals(otherLookup.var);
+		}
+		
+		@Override
+		public int hashCode() {
+			return var.hashCode();
+		}
+		
 	}
 	
 	public static final class BinaryOperation implements Expression {

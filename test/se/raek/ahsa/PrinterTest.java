@@ -6,8 +6,15 @@ import org.junit.Test;
 
 import se.raek.ahsa.ast.BinaryOperator;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.Expression.ValueLookup;
+import se.raek.ahsa.ast.Expression.VariableLookup;
+import se.raek.ahsa.ast.Statement.ThrowawayExpression;
+import se.raek.ahsa.ast.Statement.ValueDefinition;
+import se.raek.ahsa.ast.Statement.VariableAssignment;
+import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.Expression.BinaryOperation;
 import se.raek.ahsa.ast.Expression.Constant;
+import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.runtime.Value.Null;
 import se.raek.ahsa.runtime.Value.Number;
 import se.raek.ahsa.runtime.Value.Boolean;
@@ -38,6 +45,18 @@ public class PrinterTest {
 	@Test
 	public void printConstant() {
 		assertEquals("null", Printer.toString(Constant.make(Null.make())));
+	}
+
+	@Test
+	public void printValueLookup() {
+		ValueLocation val = new ValueLocation("x");
+		assertEquals("x", Printer.toString(ValueLookup.make(val)));
+	}
+
+	@Test
+	public void printVariableLookup() {
+		VariableLocation var = new VariableLocation("y");
+		assertEquals("y", Printer.toString(VariableLookup.make(var)));
 	}
 
 	@Test
@@ -82,6 +101,21 @@ public class PrinterTest {
 		String expected = "(" + Printer.toString(left) + "/"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
+	}
+	
+	@Test
+	public void printThrowawayExpression() {
+		assertEquals("null;", Printer.toString(ThrowawayExpression.make(Constant.make(Null.make()))));
+	}
+	
+	@Test
+	public void printValueDefinition() {
+		assertEquals("val x=null;", Printer.toString(ValueDefinition.make(new ValueLocation("x"), Constant.make(Null.make()))));
+	}
+	
+	@Test
+	public void printVariableAssignment() {
+		assertEquals("x=null;", Printer.toString(VariableAssignment.make(new VariableLocation("x"), Constant.make(Null.make()))));
 	}
 
 }

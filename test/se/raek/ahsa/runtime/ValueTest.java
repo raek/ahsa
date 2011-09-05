@@ -5,8 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import se.raek.ahsa.runtime.Value;
-import se.raek.ahsa.runtime.Value;
-import se.raek.ahsa.runtime.Value;
 
 public class ValueTest {
 
