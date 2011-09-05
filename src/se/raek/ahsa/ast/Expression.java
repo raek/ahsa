@@ -16,6 +16,7 @@ public interface Expression {
 		public final Value v;
 		
 		private Constant(Value v) {
+			if (v == null) throw new NullPointerException();
 			this.v = v;
 		}
 		
@@ -37,6 +38,7 @@ public interface Expression {
 		public final Expression right;
 		
 		private BinaryOperation(BinaryOperator op, Expression left, Expression right) {
+			if (op == null || left == null || right == null) throw new NullPointerException();
 			this.op = op;
 			this.left = left;
 			this.right = right;
