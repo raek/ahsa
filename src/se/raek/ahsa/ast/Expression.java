@@ -10,7 +10,9 @@ public interface Expression {
 		T caseConstant(Value v);
 		T caseValueLookup(ValueLocation val);
 		T caseVariableLookup(VariableLocation var);
-		T caseBinaryOperation(BinaryOperator op, Expression left, Expression right);
+		T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right);
+		T caseEqualityOperation(EqualityOperator op, Expression left, Expression right);
+		T caseRelationalOperation(RelationalOperator op, Expression left, Expression right);
 	}
 	
 	public static final class Constant implements Expression {
@@ -112,33 +114,119 @@ public interface Expression {
 		
 	}
 	
-	public static final class BinaryOperation implements Expression {
+	public static final class ArithmeticOperation implements Expression {
 		
-		public final BinaryOperator op;
+		public final ArithmeticOperator op;
 		public final Expression left;
 		public final Expression right;
 		
-		private BinaryOperation(BinaryOperator op, Expression left, Expression right) {
+		private ArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
 			if (op == null || left == null || right == null) throw new NullPointerException();
 			this.op = op;
 			this.left = left;
 			this.right = right;
 		}
 		
-		public static BinaryOperation make(BinaryOperator op, Expression left, Expression right) {
-			return new BinaryOperation(op, left, right);
+		public static ArithmeticOperation make(ArithmeticOperator op, Expression left, Expression right) {
+			return new ArithmeticOperation(op, left, right);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseBinaryOperation(op, left, right);
+			return m.caseArithmeticOperation(op, left, right);
 		}
 		
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
-			if (!(otherObject instanceof BinaryOperation)) return false;
-			BinaryOperation otherBinOp = (BinaryOperation) otherObject;
+			if (!(otherObject instanceof ArithmeticOperation)) return false;
+			ArithmeticOperation otherBinOp = (ArithmeticOperation) otherObject;
+			return op.equals(otherBinOp.op) &&
+					left.equals(otherBinOp.left) &&
+					right.equals(otherBinOp.right);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + op.hashCode();
+			result = 31 * result + left.hashCode();
+			result = 31 * result + right.hashCode();
+			return result;
+		}
+		
+	}
+	
+	public static final class EqualityOperation implements Expression {
+		
+		public final EqualityOperator op;
+		public final Expression left;
+		public final Expression right;
+		
+		private EqualityOperation(EqualityOperator op, Expression left, Expression right) {
+			if (op == null || left == null || right == null) throw new NullPointerException();
+			this.op = op;
+			this.left = left;
+			this.right = right;
+		}
+		
+		public static EqualityOperation make(EqualityOperator op, Expression left, Expression right) {
+			return new EqualityOperation(op, left, right);
+		}
+
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseEqualityOperation(op, left, right);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof EqualityOperation)) return false;
+			EqualityOperation otherBinOp = (EqualityOperation) otherObject;
+			return op.equals(otherBinOp.op) &&
+					left.equals(otherBinOp.left) &&
+					right.equals(otherBinOp.right);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + op.hashCode();
+			result = 31 * result + left.hashCode();
+			result = 31 * result + right.hashCode();
+			return result;
+		}
+		
+	}
+	
+	public static final class RelationalOperation implements Expression {
+		
+		public final RelationalOperator op;
+		public final Expression left;
+		public final Expression right;
+		
+		private RelationalOperation(RelationalOperator op, Expression left, Expression right) {
+			if (op == null || left == null || right == null) throw new NullPointerException();
+			this.op = op;
+			this.left = left;
+			this.right = right;
+		}
+		
+		public static RelationalOperation make(RelationalOperator op, Expression left, Expression right) {
+			return new RelationalOperation(op, left, right);
+		}
+
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseRelationalOperation(op, left, right);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof RelationalOperation)) return false;
+			RelationalOperation otherBinOp = (RelationalOperation) otherObject;
 			return op.equals(otherBinOp.op) &&
 					left.equals(otherBinOp.left) &&
 					right.equals(otherBinOp.right);

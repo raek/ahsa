@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Expression.Constant;
-import se.raek.ahsa.ast.Expression.BinaryOperation;
-import se.raek.ahsa.ast.BinaryOperator;
+import se.raek.ahsa.ast.Expression.ArithmeticOperation;
+import se.raek.ahsa.ast.ArithmeticOperator;
+import se.raek.ahsa.ast.Expression.EqualityOperation;
+import se.raek.ahsa.ast.Expression.RelationalOperation;
 import se.raek.ahsa.ast.Expression.ValueLookup;
 import se.raek.ahsa.ast.Expression.VariableLookup;
 import se.raek.ahsa.runtime.Value;
@@ -35,7 +37,17 @@ public class ExpressionTest {
 				return false;
 			}
 			@Override
-			public Boolean caseBinaryOperation(BinaryOperator op,
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
 				return false;
 			}
@@ -58,7 +70,17 @@ public class ExpressionTest {
 				return false;
 			}
 			@Override
-			public Boolean caseBinaryOperation(BinaryOperator op,
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
 				return false;
 			}
@@ -81,7 +103,17 @@ public class ExpressionTest {
 				return var.equals(varX);
 			}
 			@Override
-			public Boolean caseBinaryOperation(BinaryOperator op,
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
 				return false;
 			}
@@ -89,9 +121,9 @@ public class ExpressionTest {
 	}
 
 	@Test
-	public void matchBinaryOperation() {
+	public void matchArithmeticOperation() {
 		Expression term = Constant.make(Value.Number.make(1.0));
-		Expression expr = BinaryOperation.make(BinaryOperator.ADDITION, term, term);
+		Expression expr = ArithmeticOperation.make(ArithmeticOperator.ADDITION, term, term);
 		assertTrue(expr.matchExpression(new Expression.Matcher<Boolean>() {
 			@Override
 			public Boolean caseConstant(Value v) {
@@ -106,7 +138,87 @@ public class ExpressionTest {
 				return false;
 			}
 			@Override
-			public Boolean caseBinaryOperation(BinaryOperator op,
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return true;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchEqualityOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		Expression expr = EqualityOperation.make(EqualityOperator.EQUAL, term, term);
+		assertTrue(expr.matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return true;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchRelationalOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		Expression expr = RelationalOperation.make(RelationalOperator.GREATER, term, term);
+		assertTrue(expr.matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
 				return true;
 			}
@@ -129,11 +241,29 @@ public class ExpressionTest {
 	}
 	
 	@Test
-	public void equalsBinaryOperation() {
+	public void equalsArithmeticOperation() {
 		Expression term = Constant.make(Value.Number.make(1.0));
-		BinaryOperator op = BinaryOperator.ADDITION;
-		Expression expr1 = BinaryOperation.make(op, term, term);
-		Expression expr2 = BinaryOperation.make(op, term, term);
+		ArithmeticOperator op = ArithmeticOperator.ADDITION;
+		Expression expr1 = ArithmeticOperation.make(op, term, term);
+		Expression expr2 = ArithmeticOperation.make(op, term, term);
+		assertTrue(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void equalsEqualityOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		EqualityOperator op = EqualityOperator.EQUAL;
+		Expression expr1 = EqualityOperation.make(op, term, term);
+		Expression expr2 = EqualityOperation.make(op, term, term);
+		assertTrue(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void equalsRelationalOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		RelationalOperator op = RelationalOperator.GREATER;
+		Expression expr1 = RelationalOperation.make(op, term, term);
+		Expression expr2 = RelationalOperation.make(op, term, term);
 		assertTrue(expr1.equals(expr2));
 	}
 	 
@@ -153,11 +283,29 @@ public class ExpressionTest {
 	}
 	
 	@Test
-	public void equalHashCodeBinaryOperation() {
+	public void equalHashCodeArithmeticOperation() {
 		Expression term = Constant.make(Value.Number.make(1.0));
-		BinaryOperator op = BinaryOperator.ADDITION;
-		Expression expr1 = BinaryOperation.make(op, term, term);
-		Expression expr2 = BinaryOperation.make(op, term, term);
+		ArithmeticOperator op = ArithmeticOperator.ADDITION;
+		Expression expr1 = ArithmeticOperation.make(op, term, term);
+		Expression expr2 = ArithmeticOperation.make(op, term, term);
+		assertTrue(expr1.hashCode() == expr2.hashCode());
+	}
+	
+	@Test
+	public void equalHashCodeEqualityOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		EqualityOperator op = EqualityOperator.EQUAL;
+		Expression expr1 = EqualityOperation.make(op, term, term);
+		Expression expr2 = EqualityOperation.make(op, term, term);
+		assertTrue(expr1.hashCode() == expr2.hashCode());
+	}
+	
+	@Test
+	public void equalHashCodeRelationalOperation() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		RelationalOperator op = RelationalOperator.GREATER;
+		Expression expr1 = RelationalOperation.make(op, term, term);
+		Expression expr2 = RelationalOperation.make(op, term, term);
 		assertTrue(expr1.hashCode() == expr2.hashCode());
 	}
 	
@@ -177,32 +325,92 @@ public class ExpressionTest {
 	}
 	
 	@Test
-	public void notEqualBinaryOperationOp() {
+	public void notEqualArithmeticOperationOp() {
 		Expression term = Constant.make(Value.Number.make(1.0));
-		Expression expr1 = BinaryOperation.make(BinaryOperator.ADDITION, term, term);
-		Expression expr2 = BinaryOperation.make(BinaryOperator.SUBTRACTION, term, term);
+		Expression expr1 = ArithmeticOperation.make(ArithmeticOperator.ADDITION, term, term);
+		Expression expr2 = ArithmeticOperation.make(ArithmeticOperator.SUBTRACTION, term, term);
 		assertFalse(expr1.equals(expr2));
 	}
 	
 	@Test
-	public void notEqualBinaryOperationLeft() {
+	public void notEqualArithmeticOperationLeft() {
 		Expression term1 = Constant.make(Value.Number.make(1.0));
 		Expression term2 = Constant.make(Value.Number.make(2.0));
 		Expression term3 = Constant.make(Value.Number.make(3.0));
-		BinaryOperator op = BinaryOperator.ADDITION;
-		Expression expr1 = BinaryOperation.make(op, term1, term3);
-		Expression expr2 = BinaryOperation.make(op, term2, term3);
+		ArithmeticOperator op = ArithmeticOperator.ADDITION;
+		Expression expr1 = ArithmeticOperation.make(op, term1, term3);
+		Expression expr2 = ArithmeticOperation.make(op, term2, term3);
 		assertFalse(expr1.equals(expr2));
 	}
 	
 	@Test
-	public void notEqualBinaryOperationRight() {
+	public void notEqualArithmeticOperationRight() {
 		Expression term1 = Constant.make(Value.Number.make(1.0));
 		Expression term2 = Constant.make(Value.Number.make(2.0));
 		Expression term3 = Constant.make(Value.Number.make(3.0));
-		BinaryOperator op = BinaryOperator.ADDITION;
-		Expression expr1 = BinaryOperation.make(op, term3, term1);
-		Expression expr2 = BinaryOperation.make(op, term3, term2);
+		ArithmeticOperator op = ArithmeticOperator.ADDITION;
+		Expression expr1 = ArithmeticOperation.make(op, term3, term1);
+		Expression expr2 = ArithmeticOperation.make(op, term3, term2);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualEqualityOperationOp() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		Expression expr1 = EqualityOperation.make(EqualityOperator.EQUAL, term, term);
+		Expression expr2 = EqualityOperation.make(EqualityOperator.UNEQUAL, term, term);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualEqualityOperationLeft() {
+		Expression term1 = Constant.make(Value.Number.make(1.0));
+		Expression term2 = Constant.make(Value.Number.make(2.0));
+		Expression term3 = Constant.make(Value.Number.make(3.0));
+		EqualityOperator op = EqualityOperator.EQUAL;
+		Expression expr1 = EqualityOperation.make(op, term1, term3);
+		Expression expr2 = EqualityOperation.make(op, term2, term3);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualEqualityOperationRight() {
+		Expression term1 = Constant.make(Value.Number.make(1.0));
+		Expression term2 = Constant.make(Value.Number.make(2.0));
+		Expression term3 = Constant.make(Value.Number.make(3.0));
+		EqualityOperator op = EqualityOperator.EQUAL;
+		Expression expr1 = EqualityOperation.make(op, term3, term1);
+		Expression expr2 = EqualityOperation.make(op, term3, term2);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualRelationalOperationOp() {
+		Expression term = Constant.make(Value.Number.make(1.0));
+		Expression expr1 = RelationalOperation.make(RelationalOperator.GREATER, term, term);
+		Expression expr2 = RelationalOperation.make(RelationalOperator.LESS, term, term);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualRelationalOperationLeft() {
+		Expression term1 = Constant.make(Value.Number.make(1.0));
+		Expression term2 = Constant.make(Value.Number.make(2.0));
+		Expression term3 = Constant.make(Value.Number.make(3.0));
+		RelationalOperator op = RelationalOperator.GREATER;
+		Expression expr1 = RelationalOperation.make(op, term1, term3);
+		Expression expr2 = RelationalOperation.make(op, term2, term3);
+		assertFalse(expr1.equals(expr2));
+	}
+	
+	@Test
+	public void notEqualRelationalOperationRight() {
+		Expression term1 = Constant.make(Value.Number.make(1.0));
+		Expression term2 = Constant.make(Value.Number.make(2.0));
+		Expression term3 = Constant.make(Value.Number.make(3.0));
+		RelationalOperator op = RelationalOperator.GREATER;
+		Expression expr1 = RelationalOperation.make(op, term3, term1);
+		Expression expr2 = RelationalOperation.make(op, term3, term2);
 		assertFalse(expr1.equals(expr2));
 	}
 

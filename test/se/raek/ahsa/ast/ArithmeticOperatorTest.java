@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class BinaryOperatorTest {
+public class ArithmeticOperatorTest {
 
 	@Test
 	public void matchAddition() {
-		assertTrue(BinaryOperator.ADDITION.matchBinaryOperator(new BinaryOperator.Matcher<Boolean>() {
+		assertTrue(ArithmeticOperator.ADDITION.matchArithmeticOperator(new ArithmeticOperator.Matcher<Boolean>() {
 			@Override
 			public Boolean caseAddition() {
 				return true;
@@ -30,7 +30,7 @@ public class BinaryOperatorTest {
 
 	@Test
 	public void matchSubstraction() {
-		assertTrue(BinaryOperator.SUBTRACTION.matchBinaryOperator(new BinaryOperator.Matcher<Boolean>() {
+		assertTrue(ArithmeticOperator.SUBTRACTION.matchArithmeticOperator(new ArithmeticOperator.Matcher<Boolean>() {
 			@Override
 			public Boolean caseAddition() {
 				return false;
@@ -52,7 +52,7 @@ public class BinaryOperatorTest {
 
 	@Test
 	public void matchMultiplication() {
-		assertTrue(BinaryOperator.MULTIPLICATION.matchBinaryOperator(new BinaryOperator.Matcher<Boolean>() {
+		assertTrue(ArithmeticOperator.MULTIPLICATION.matchArithmeticOperator(new ArithmeticOperator.Matcher<Boolean>() {
 			@Override
 			public Boolean caseAddition() {
 				return false;
@@ -74,7 +74,7 @@ public class BinaryOperatorTest {
 
 	@Test
 	public void matchDivision() {
-		assertTrue(BinaryOperator.DIVISION.matchBinaryOperator(new BinaryOperator.Matcher<Boolean>() {
+		assertTrue(ArithmeticOperator.DIVISION.matchArithmeticOperator(new ArithmeticOperator.Matcher<Boolean>() {
 			@Override
 			public Boolean caseAddition() {
 				return false;
