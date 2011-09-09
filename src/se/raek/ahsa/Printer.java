@@ -2,6 +2,7 @@ package se.raek.ahsa;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
@@ -35,6 +36,13 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		stmt.matchStatement(printer);
 	}
 	
+	public static void print(List<Statement> stmts, PrintWriter writer) {
+		Printer printer = new Printer(writer);
+		for (Statement stmt : stmts) {
+			stmt.matchStatement(printer);
+		}
+	}
+	
 	public static String toString(Value v) {
 		StringWriter sw = new StringWriter();
 		print(v, new PrintWriter(sw));
@@ -50,6 +58,12 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 	public static String toString(Statement stmt) {
 		StringWriter sw = new StringWriter();
 		print(stmt, new PrintWriter(sw));
+		return sw.toString();
+	}
+	
+	public static String toString(List<Statement> stmts) {
+		StringWriter sw = new StringWriter();
+		print(stmts, new PrintWriter(sw));
 		return sw.toString();
 	}
 

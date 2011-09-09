@@ -28,6 +28,13 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		stmt.matchStatement(new Interpreter(sto));
 	}
 	
+	public static void execute(List<Statement> stmts, Store sto) {
+		Interpreter interp = new Interpreter(sto);
+		for (Statement stmt : stmts) {
+			stmt.matchStatement(interp);
+		}
+	}
+	
 	public static class CastException extends RuntimeException {
 		
 		private static final long serialVersionUID = -3113471139719820971L;
