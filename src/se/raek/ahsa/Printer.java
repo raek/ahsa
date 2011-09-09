@@ -211,4 +211,21 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
+	@Override
+	public Void caseConditional(Expression cond, List<Statement> thenStmts,
+			List<Statement> elseStmts) {
+		writer.print("if ");
+		cond.matchExpression(this);
+		writer.print("{");
+		for (Statement stmt : thenStmts) {
+			stmt.matchStatement(this);
+		}
+		writer.print("}else{");
+		for (Statement stmt : elseStmts) {
+			stmt.matchStatement(this);
+		}
+		writer.print("}");
+		return null;
+	}
+
 }

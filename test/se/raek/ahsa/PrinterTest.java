@@ -2,6 +2,10 @@ package se.raek.ahsa;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 
 import se.raek.ahsa.ast.Expression;
@@ -9,6 +13,8 @@ import se.raek.ahsa.ast.Expression.EqualityOperation;
 import se.raek.ahsa.ast.Expression.RelationalOperation;
 import se.raek.ahsa.ast.Expression.ValueLookup;
 import se.raek.ahsa.ast.Expression.VariableLookup;
+import se.raek.ahsa.ast.Statement;
+import se.raek.ahsa.ast.Statement.Conditional;
 import se.raek.ahsa.ast.Statement.ThrowawayExpression;
 import se.raek.ahsa.ast.Statement.ValueDefinition;
 import se.raek.ahsa.ast.Statement.VariableAssignment;
@@ -163,6 +169,28 @@ public class PrinterTest {
 	public void printVariableAssignment() {
 		assertEquals("x=null;", Printer.toString(VariableAssignment.make(
 				new VariableLocation("x"), Constant.make(Null.make()))));
+	}
+
+	@Test
+	public void printConditional() {
+		VariableLocation var = new VariableLocation("x");
+		Expression cond = VariableLookup.make(var);
+		List<Statement> thenStmts = Collections
+				.singletonList((Statement) VariableAssignment.make(var,
+						Constant.make(Boolean.make(true))));
+		List<Statement> elseStmts = Collections
+				.singletonList((Statement) VariableAssignment.make(var,
+						Constant.make(Boolean.make(false))));
+		assertEquals("if x{x=true;}else{x=false;}",
+				Printer.toString(Conditional.make(cond, thenStmts, elseStmts)));
+	}
+
+	@Test
+	public void printStatements() {
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(ThrowawayExpression.make(Constant.make(Boolean.make(true))));
+		stmts.add(ThrowawayExpression.make(Constant.make(Boolean.make(false))));
+		assertEquals("true;false;", Printer.toString(stmts));
 	}
 
 }

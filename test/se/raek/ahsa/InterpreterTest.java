@@ -2,16 +2,23 @@ package se.raek.ahsa;
 
 import static org.junit.Assert.*;
 
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.junit.Test;
+import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Expression.EqualityOperation;
 import se.raek.ahsa.ast.Expression.RelationalOperation;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression.ValueLookup;
 import se.raek.ahsa.ast.Expression.VariableLookup;
+import se.raek.ahsa.ast.Statement.ValueDefinition;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.Expression.Constant;
 import se.raek.ahsa.ast.Expression.ArithmeticOperation;
+import se.raek.ahsa.ast.Statement.Conditional;
+import se.raek.ahsa.ast.Statement.VariableAssignment;
 import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
@@ -134,26 +141,30 @@ public class InterpreterTest {
 
 	@Test
 	public void evalLessTrue() {
-		assertEquals(Boolean.make(true), Interpreter.eval(
-				RelationalOperation.make(LESS, c2, c3), null));
+		assertEquals(Boolean.make(true),
+				Interpreter.eval(RelationalOperation.make(LESS, c2, c3), null));
 	}
 
 	@Test
 	public void evalLessFalse() {
-		assertEquals(Boolean.make(false), Interpreter.eval(
-				RelationalOperation.make(LESS, c3, c2), null));
+		assertEquals(Boolean.make(false),
+				Interpreter.eval(RelationalOperation.make(LESS, c3, c2), null));
 	}
 
 	@Test
 	public void evalGreaterEqualTrue() {
-		assertEquals(Boolean.make(true), Interpreter.eval(
-				RelationalOperation.make(GREATER_EQUAL, c3, c2), null));
+		assertEquals(
+				Boolean.make(true),
+				Interpreter.eval(
+						RelationalOperation.make(GREATER_EQUAL, c3, c2), null));
 	}
 
 	@Test
 	public void evalGreaterEqualFalse() {
-		assertEquals(Boolean.make(false), Interpreter.eval(
-				RelationalOperation.make(GREATER_EQUAL, c2, c3), null));
+		assertEquals(
+				Boolean.make(false),
+				Interpreter.eval(
+						RelationalOperation.make(GREATER_EQUAL, c2, c3), null));
 	}
 
 	@Test
@@ -192,20 +203,84 @@ public class InterpreterTest {
 		Interpreter.execute(Statement.VariableAssignment.make(varY, c1), sto);
 		assertEquals(v1, sto.lookupVariable(varY));
 	}
-	
+
+	@Test
+	public void executeConditionalTrue() {
+		Constant c0 = Constant.make(Number.make(0.0));
+		Expression lookupX = ValueLookup.make(valX);
+		Store sto = new Store(null);
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(ValueDefinition.make(valX, Constant.make(Number.make(2.0))));
+		Expression cond = RelationalOperation.make(GREATER_EQUAL, lookupX, c0);
+		Statement thenStmt = VariableAssignment.make(varY, lookupX);
+		Statement elseStmt = VariableAssignment.make(varY,
+				ArithmeticOperation.make(SUBTRACTION, c0, lookupX));
+		stmts.add(Conditional.make(cond, Collections.singletonList(thenStmt),
+				Collections.singletonList(elseStmt)));
+		Interpreter.execute(stmts, sto);
+		assertEquals(Number.make(2.0), sto.lookupVariable(varY));
+	}
+
+	@Test
+	public void executeConditionalFalse() {
+		Constant c0 = Constant.make(Number.make(0.0));
+		Expression lookupX = ValueLookup.make(valX);
+		Store sto = new Store(null);
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(ValueDefinition.make(valX, Constant.make(Number.make(-2.0))));
+		Expression cond = RelationalOperation.make(GREATER_EQUAL, lookupX, c0);
+		Statement thenStmt = VariableAssignment.make(varY, lookupX);
+		Statement elseStmt = VariableAssignment.make(varY,
+				ArithmeticOperation.make(SUBTRACTION, c0, lookupX));
+		stmts.add(Conditional.make(cond, Collections.singletonList(thenStmt),
+				Collections.singletonList(elseStmt)));
+		Interpreter.execute(stmts, sto);
+		assertEquals(Number.make(2.0), sto.lookupVariable(varY));
+	}
+
 	@Test
 	public void typeNameNull() {
 		assertEquals("null", Interpreter.typeName(Null.make()));
 	}
-	
+
 	@Test
 	public void typeNameBoolean() {
 		assertEquals("boolean", Interpreter.typeName(Boolean.make(true)));
 	}
-	
+
 	@Test
 	public void typeNameNumber() {
 		assertEquals("number", Interpreter.typeName(Number.make(1.0)));
+	}
+	
+	@Test
+	public void isTruthyNull() {
+		assertFalse(Interpreter.isTruthy(Null.make()));
+	}
+	
+	@Test
+	public void isTruthyBooleanTrue() {
+		assertTrue(Interpreter.isTruthy(Boolean.make(true)));
+	}
+	
+	@Test
+	public void isTruthyBooleanFalse() {
+		assertFalse(Interpreter.isTruthy(Boolean.make(false)));
+	}
+	
+	@Test
+	public void isTruthyNumberPositive() {
+		assertTrue(Interpreter.isTruthy(Number.make(1.0)));
+	}
+	
+	@Test
+	public void isTruthyNumberZero() {
+		assertTrue(Interpreter.isTruthy(Number.make(0.0)));
+	}
+	
+	@Test
+	public void isTruthyNumberNegative() {
+		assertTrue(Interpreter.isTruthy(Number.make(-1.0)));
 	}
 
 }

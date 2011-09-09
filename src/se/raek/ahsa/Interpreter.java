@@ -74,6 +74,23 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			}
 		});
 	}
+	
+	public static boolean isTruthy(final Value v) {
+		return v.matchValue(new Value.AbstractMatcher<Boolean>() {
+			@Override
+			public Boolean caseNull() {
+				return false;
+			}
+			@Override
+			public Boolean caseBoolean(boolean b) {
+				return b;
+			}
+			@Override
+			public Boolean otherwise() {
+				return true;
+			}
+		});
+	}
 
 	@Override
 	public Value caseConstant(Value v) {
@@ -176,6 +193,21 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	public Void caseVariableAssignment(VariableLocation var, Expression expr) {
 		Value result = expr.matchExpression(this);
 		sto.assignVariable(var, result);
+		return null;
+	}
+
+	@Override
+	public Void caseConditional(Expression cond, List<Statement> thenStmts,
+			List<Statement> elseStmts) {
+		if (isTruthy(cond.matchExpression(this))) {
+			for (Statement stmt : thenStmts) {
+				stmt.matchStatement(this);
+			}
+		} else {
+			for (Statement stmt : elseStmts) {
+				stmt.matchStatement(this);
+			}
+		}
 		return null;
 	}
 }

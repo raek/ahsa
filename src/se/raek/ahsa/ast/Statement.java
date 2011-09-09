@@ -1,5 +1,7 @@
 package se.raek.ahsa.ast;
 
+import java.util.List;
+
 public interface Statement {
 	
 	<T> T matchStatement(Matcher<T> m);
@@ -8,6 +10,7 @@ public interface Statement {
 		T caseThrowawayExpression(Expression expr);
 		T caseValueDefinition(ValueLocation val, Expression expr);
 		T caseVariableAssignment(VariableLocation var, Expression expr);
+		T caseConditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts);
 	}
 	
 	public static final class ThrowawayExpression implements Statement {
@@ -93,8 +96,8 @@ public interface Statement {
 			this.expr = expr;
 		}
 		
-		public static VariableAssignment make(VariableLocation val, Expression expr) {
-			return new VariableAssignment(val, expr);
+		public static VariableAssignment make(VariableLocation var, Expression expr) {
+			return new VariableAssignment(var, expr);
 		}
 
 		@Override
@@ -116,6 +119,49 @@ public interface Statement {
 			int result = 17;
 			result = 31 * result + var.hashCode();
 			result = 31 * result + expr.hashCode();
+			return result;
+		}
+		
+	}
+	
+	public static final class Conditional implements Statement {
+		
+		private final Expression cond;
+		private final List<Statement> thenStmts;
+		private final List<Statement> elseStmts;
+		
+		private Conditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts) {
+			if (cond == null || thenStmts == null || elseStmts == null) throw new NullPointerException();
+			this.cond = cond;
+			this.thenStmts = thenStmts;
+			this.elseStmts = elseStmts;
+		}
+		
+		public static Conditional make(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts) {
+			return new Conditional(cond, thenStmts, elseStmts);
+		}
+
+		@Override
+		public <T> T matchStatement(Matcher<T> m) {
+			return m.caseConditional(cond, thenStmts, elseStmts);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Conditional)) return false;
+			Conditional otherConditional = (Conditional) otherObject;
+			return cond.equals(otherConditional.cond) &&
+					thenStmts.equals(otherConditional.thenStmts) &&
+					elseStmts.equals(otherConditional.elseStmts);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + cond.hashCode();
+			result = 31 * result + thenStmts.hashCode();
+			result = 31 * result + elseStmts.hashCode();
 			return result;
 		}
 		

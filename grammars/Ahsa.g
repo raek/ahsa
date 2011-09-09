@@ -9,6 +9,7 @@ package se.raek.ahsa;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.EqualityOperator;
@@ -27,13 +28,26 @@ program
 
 statements returns [List<Statement> stmts]
   @init{ $stmts = new ArrayList<Statement>(); }
-	: (s=statement { $stmts.add($s.stmt); }
-	  ';'
-	  )*
+	: (s=statement { $stmts.add($s.stmt); })*
 	;
 
 statement returns [Statement stmt]
-	: e=expression { $stmt = Statement.ThrowawayExpression.make($e.expr); }
+	: e=expression ';' { $stmt = Statement.ThrowawayExpression.make($e.expr); }
+	| { Expression cond; List<Statement> thenStmts, elseStmts = null; }
+	  'if'
+	  c=expression       { cond = $c.expr; }
+	  '{'
+	  thens=statements   { thenStmts = $thens.stmts; }
+	  '}'
+	  ('else'
+	    '{'
+	    elses=statements { elseStmts = $elses.stmts; }
+	    '}')?
+	  { if (elseStmts == null) {
+	        elseStmts = Collections.emptyList();
+	    } 
+	    $stmt = Statement.Conditional.make(cond, thenStmts, elseStmts);
+	  }
 	;
 
 expression returns [Expression expr]
