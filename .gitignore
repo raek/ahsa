@@ -4,3 +4,6 @@
 .djunitplugin
 bin
 jcoverage.ser
+*.tokens
+src/se/raek/ahsa/AhsaLexer.java
+src/se/raek/ahsa/AhsaParser.java
