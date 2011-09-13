@@ -19,7 +19,7 @@ import se.raek.ahsa.runtime.Value;
 }
 
 @lexer::header {
-package se.raek.ahsa;
+package se.raek.ahsa.parser;
 }
 
 program
