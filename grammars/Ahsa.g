@@ -5,7 +5,7 @@ options {
 }
 
 @parser::header {
-package se.raek.ahsa;
+package se.raek.ahsa.parser;
 
 import java.util.List;
 import java.util.ArrayList;
