@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.ValueLocation;
+import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.ArithmeticOperator;
@@ -22,17 +24,24 @@ import se.raek.ahsa.runtime.Value;
 package se.raek.ahsa.parser;
 }
 
+@parser::members {
+
+private EnvironmentStack envStack = new EnvironmentStack();
+
+}
+
 program
 	: statements
 	;
 
 statements returns [List<Statement> stmts]
   @init{ $stmts = new ArrayList<Statement>(); }
-	: (s=statement { $stmts.add($s.stmt); })*
+	: (s=statement { $stmts.addAll($s.stmts); })*
 	;
 
-statement returns [Statement stmt]
-	: e=expression ';' { $stmt = Statement.ThrowawayExpression.make($e.expr); }
+statement returns [List<Statement> stmts]
+  @init{ $stmts = new ArrayList<Statement>(); }
+	: e=expression ';' { $stmts.add(Statement.ThrowawayExpression.make($e.expr)); }
 	| { Expression cond; List<Statement> thenStmts, elseStmts = null; }
 	  'if'
 	  c=expression       { cond = $c.expr; }
@@ -46,8 +55,51 @@ statement returns [Statement stmt]
 	  { if (elseStmts == null) {
 	        elseStmts = Collections.emptyList();
 	    } 
-	    $stmt = Statement.Conditional.make(cond, thenStmts, elseStmts);
+	    $stmts.add(Statement.Conditional.make(cond, thenStmts, elseStmts));
 	  }
+	| 'val' ID '=' expression ';' {
+	    ValueLocation val = envStack.getCurrent().installValue($ID.text);
+	    $stmts.add(Statement.ValueDefinition.make(val, $expression.expr));
+	  }
+	| { Expression expr = null; }
+	  'var' ID
+	  ('=' expression
+	    { expr = $expression.expr; }
+	  )?
+	  ';'
+	  {
+	    VariableLocation var = envStack.getCurrent().installVariable($ID.text);
+	    if (expr != null) {
+	      $stmts.add(Statement.VariableAssignment.make(var, $expression.expr));
+	    }
+	  }
+  | ID '=' expression ';'
+    {
+      final String label = $ID.text;
+      Identifier id = envStack.getCurrent().resolve(label);
+      VariableLocation var = id.matchIdentifier(new Identifier.Matcher<VariableLocation>() {
+        @Override
+        public VariableLocation caseUnbound() {
+          throw new RuntimeException("Unbound identifier: " + label);
+        }
+        @Override
+        public VariableLocation caseValue(ValueLocation val) {
+          throw new RuntimeException("Cannot assign named value: " + label);
+        }
+        @Override
+        public VariableLocation caseVariable(VariableLocation var) {
+          return var;
+        }
+        @Override
+        public VariableLocation caseInaccessibleVariable(VariableLocation var) {
+          throw new RuntimeException("Variable inaccessible from here: " + var.label);
+        }
+      });
+      $stmts.add(Statement.VariableAssignment.make(var, $expression.expr));
+    }
+  | '{'        { envStack.enterScope(Environment.Type.BLOCK); }
+    statements { $stmts = $statements.stmts; }
+    '}'        { envStack.exitScope(); }
 	;
 
 expression returns [Expression expr]
@@ -76,6 +128,7 @@ expr3 returns [Expression expr]
 
 expr4 returns [Expression expr]
 	: c=constant		       { $expr = Expression.Constant.make($c.v); }
+	| l=lookup             { $expr = $l.expr; }
 	| '(' e=expression ')' { $expr = $e.expr; }
 	;
 
@@ -84,6 +137,31 @@ constant returns [Value v]
 	| b=boolean_literal	{ $v = Value.Boolean.make($b.b); }
 	| n=number_literal	{ $v = Value.Number.make($n.n); }
 	;
+
+lookup returns [Expression expr]
+  : ID {
+      final String label = $ID.text;
+      Identifier id = envStack.getCurrent().resolve(label);
+      $expr = id.matchIdentifier(new Identifier.Matcher<Expression>() {
+        @Override
+        public Expression caseUnbound() {
+          throw new RuntimeException("Unbound identifier: " + label);
+        }
+        @Override
+        public Expression caseValue(ValueLocation val) {
+          return Expression.ValueLookup.make(val);
+        }
+        @Override
+        public Expression caseVariable(VariableLocation var) {
+          return Expression.VariableLookup.make(var);
+        }
+        @Override
+        public Expression caseInaccessibleVariable(VariableLocation var) {
+          throw new RuntimeException("Variable inaccessible from here: " + var.label);
+        }
+      });
+    }
+  ;
 
 eq_op returns [EqualityOperator op]
   : '=='  { $op = EqualityOperator.EQUAL; }
@@ -120,6 +198,6 @@ number_literal returns [double n]
 
 NUMBER: ('0'|'1'..'9' ('0'..'9')*)('.' ('0'..'9')*)?;
 
-ID: ('a'..'z'|'A'..'Z')+ ;
+ID: ('A'..'Z'|'a'..'z'|'_')('A'..'Z'|'a'..'z'|'0'..'9'|'_')* ;
 
 WS: (' '|'\t'|'\r'|'\n')+ {skip();} ;
