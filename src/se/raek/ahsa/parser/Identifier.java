@@ -29,6 +29,11 @@ public interface Identifier {
 		public <T> T matchIdentifier(Matcher<T> m) {
 			return m.caseUnbound();
 		}
+		
+		@Override
+		public String toString() {
+			return "Unbound()"; 
+		}
 	}
 	
 	public static class Value implements Identifier {
@@ -47,6 +52,11 @@ public interface Identifier {
 		@Override
 		public <T> T matchIdentifier(Matcher<T> m) {
 			return m.caseValue(val);
+		}
+		
+		@Override
+		public String toString() {
+			return "Value(" + val + ")"; 
 		}
 		
 		@Override
@@ -82,6 +92,11 @@ public interface Identifier {
 		}
 		
 		@Override
+		public String toString() {
+			return "Variable(" + var + ")"; 
+		}
+		
+		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof Variable)) return false;
@@ -111,6 +126,11 @@ public interface Identifier {
 		@Override
 		public <T> T matchIdentifier(Matcher<T> m) {
 			return m.caseInaccessibleVariable(var);
+		}
+		
+		@Override
+		public String toString() {
+			return "InaccessibleVariable(" + var + ")"; 
 		}
 		
 		@Override

@@ -45,6 +45,11 @@ public class Environment {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return bindings.toString();
+	}
+
 	public Identifier resolve(String id) {
 		Identifier result = bindings.get(id);
 		if (result == null) {

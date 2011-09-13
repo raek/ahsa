@@ -14,5 +14,10 @@ public class VariableLocation {
 		this.id = nextId.getAndIncrement();
 		this.label = label;
 	}
+	
+	@Override
+	public String toString() {
+		return "var" + id + "/" + label; 
+	}
 
 }

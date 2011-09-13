@@ -44,6 +44,11 @@ public interface Statement {
 			return expr.hashCode();
 		}
 		
+		@Override
+		public String toString() {
+			return "ThrowawayExpression(" + expr + ")";
+		}
+		
 	}
 	
 	public static final class ValueDefinition implements Statement {
@@ -83,6 +88,11 @@ public interface Statement {
 			return result;
 		}
 		
+		@Override
+		public String toString() {
+			return "ValueDefinition(" + val + ", " + expr + ")";
+		}
+		
 	}
 	
 	public static final class VariableAssignment implements Statement {
@@ -120,6 +130,11 @@ public interface Statement {
 			result = 31 * result + var.hashCode();
 			result = 31 * result + expr.hashCode();
 			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "VariableAssignment(" + var + ", " + expr + ")";
 		}
 		
 	}
@@ -163,6 +178,11 @@ public interface Statement {
 			result = 31 * result + thenStmts.hashCode();
 			result = 31 * result + elseStmts.hashCode();
 			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "Conditional(" + cond + ", " + thenStmts + ", " + elseStmts + ")";
 		}
 		
 	}

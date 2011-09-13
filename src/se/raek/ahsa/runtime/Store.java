@@ -18,6 +18,11 @@ public final class Store {
 		this.parent = parent;
 	}
 	
+	@Override
+	public String toString() {
+		return "Store(" + vals + ", " + vars + ", " + parent + ")";
+	}
+	
 	public static class ValueNotFoundException extends RuntimeException {
 		
 		private static final long serialVersionUID = -1588984589012825978L;

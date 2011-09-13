@@ -45,6 +45,11 @@ public interface Expression {
 		public int hashCode() {
 			return v.hashCode();
 		}
+		
+		@Override
+		public String toString() {
+			return "Constant(" + v + ")";
+		}
 
 	}
 	
@@ -79,6 +84,11 @@ public interface Expression {
 			return val.hashCode();
 		}
 		
+		@Override
+		public String toString() {
+			return "ValueLookup(" + val + ")";
+		}
+		
 	}
 	
 	public static final class VariableLookup implements Expression {
@@ -110,6 +120,11 @@ public interface Expression {
 		@Override
 		public int hashCode() {
 			return var.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return "VariableLookup(" + var + ")";
 		}
 		
 	}
@@ -155,6 +170,11 @@ public interface Expression {
 			return result;
 		}
 		
+		@Override
+		public String toString() {
+			return "ArithmeticOperation(" + op + ", " + left + ", " + right + ")";
+		}
+		
 	}
 	
 	public static final class EqualityOperation implements Expression {
@@ -198,6 +218,11 @@ public interface Expression {
 			return result;
 		}
 		
+		@Override
+		public String toString() {
+			return "EqualityOperation(" + op + ", " + left + ", " + right + ")";
+		}
+		
 	}
 	
 	public static final class RelationalOperation implements Expression {
@@ -239,6 +264,11 @@ public interface Expression {
 			result = 31 * result + left.hashCode();
 			result = 31 * result + right.hashCode();
 			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "RelationalOperation(" + op + ", " + left + ", " + right + ")";
 		}
 		
 	}

@@ -14,5 +14,10 @@ public class ValueLocation {
 		this.id = nextId.getAndIncrement();
 		this.label = label;
 	}
+	
+	@Override
+	public String toString() {
+		return "val" + id + "/" + label; 
+	}
 
 }

@@ -24,5 +24,10 @@ public class EnvironmentStack {
 	public void exitScope() {
 		stack.removeFirst();
 	}
+	
+	@Override
+	public String toString() {
+		return stack.toString();
+	}
 
 }

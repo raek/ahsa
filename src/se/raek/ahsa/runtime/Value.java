@@ -25,6 +25,11 @@ public interface Value {
 		public <T> T matchValue(Matcher<T> m) {
 			return m.caseNull();
 		}
+		
+		@Override
+		public String toString() {
+			return "Null()";
+		}
 	
 	}
 	
@@ -46,6 +51,11 @@ public interface Value {
 		@Override
 		public <T> T matchValue(Matcher<T> m) {
 			return m.caseBoolean(b);
+		}
+		
+		@Override
+		public String toString() {
+			return "Boolean(" + b + ")";
 		}
 	}
 	
@@ -78,6 +88,11 @@ public interface Value {
 		public int hashCode() {
 			long v = Double.doubleToLongBits(n);
 			return  (int)(v^(v>>>32));
+		}
+		
+		@Override
+		public String toString() {
+			return "Number(" + n + ")";
 		}
 	}
 	
