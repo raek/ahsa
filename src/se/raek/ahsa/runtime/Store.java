@@ -12,6 +12,12 @@ public final class Store {
 	private final Map<VariableLocation, Value> vars;
 	private final Store parent;
 	
+	public Store() {
+		this.vals = new HashMap<ValueLocation, Value>();
+		this.vars = new HashMap<VariableLocation, Value>();
+		this.parent = null;
+	}
+	
 	public Store(Store parent) {
 		this.vals = new HashMap<ValueLocation, Value>();
 		this.vars = new HashMap<VariableLocation, Value>();

@@ -28,6 +28,10 @@ package se.raek.ahsa.parser;
 
 private EnvironmentStack envStack = new EnvironmentStack();
 
+public void resetEnvironment(Environment env) {
+  envStack.resetEnvironment(env);
+}
+
 }
 
 program

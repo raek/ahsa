@@ -25,6 +25,11 @@ public class EnvironmentStack {
 		stack.removeFirst();
 	}
 	
+	public void resetEnvironment(Environment env) {
+		stack.clear();
+		stack.addFirst(env);
+	}
+	
 	@Override
 	public String toString() {
 		return stack.toString();
