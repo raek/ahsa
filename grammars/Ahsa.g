@@ -137,9 +137,9 @@ expr4 returns [Expression expr]
 	;
 
 constant returns [Value v]
-	: null_literal		{ $v = Value.Null.make(); }
-	| b=boolean_literal	{ $v = Value.Boolean.make($b.b); }
-	| n=number_literal	{ $v = Value.Number.make($n.n); }
+	: null_literal      { $v = Value.Null.make(); }
+	| b=boolean_literal { $v = Value.Boolean.make($b.b); }
+	| n=number_literal  { $v = Value.Number.make($n.n); }
 	;
 
 lookup returns [Expression expr]
@@ -168,8 +168,8 @@ lookup returns [Expression expr]
   ;
 
 eq_op returns [EqualityOperator op]
-  : '=='  { $op = EqualityOperator.EQUAL; }
-  | '!='  { $op = EqualityOperator.UNEQUAL; }
+  : '==' { $op = EqualityOperator.EQUAL; }
+  | '!=' { $op = EqualityOperator.UNEQUAL; }
   ;
 
 rel_op returns [RelationalOperator op]
@@ -204,4 +204,4 @@ NUMBER: ('0'|'1'..'9' ('0'..'9')*)('.' ('0'..'9')*)?;
 
 ID: ('A'..'Z'|'a'..'z'|'_')('A'..'Z'|'a'..'z'|'0'..'9'|'_')* ;
 
-WS: (' '|'\t'|'\r'|'\n')+ {skip();} ;
+WS: (' '|'\t'|'\r'|'\n')+ { $channel = HIDDEN; } ;
