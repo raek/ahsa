@@ -34,7 +34,7 @@ public final class Store {
 		private static final long serialVersionUID = -1588984589012825978L;
 
 		public ValueNotFoundException(ValueLocation val) {
-			super("value not found in extended scope: " + val.label);
+			super("value unbound in extended scope: " + val.label);
 		}
 		
 	}
@@ -44,7 +44,7 @@ public final class Store {
 		private static final long serialVersionUID = -1588984589012825978L;
 
 		public ValueAlreadyDefinedException(ValueLocation val) {
-			super("value already defined in local scope: " + val.label);
+			super("value already bound in local scope: " + val.label);
 		}
 		
 	}
@@ -54,7 +54,7 @@ public final class Store {
 		private static final long serialVersionUID = -5315071488234846789L;
 
 		public VariableNotFoundException(VariableLocation var) {
-			super("variable not found in local scope: " + var.label);
+			super("variable unbound in local scope: " + var.label);
 		}
 		
 	}
