@@ -7,12 +7,17 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+
+import se.raek.ahsa.Interpreter.CastException;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Expression.EqualityOperation;
+import se.raek.ahsa.ast.Expression.FunctionAbstraction;
+import se.raek.ahsa.ast.Expression.FunctionApplication;
 import se.raek.ahsa.ast.Expression.RelationalOperation;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression.ValueLookup;
 import se.raek.ahsa.ast.Expression.VariableLookup;
+import se.raek.ahsa.ast.Statement.ThrowawayExpression;
 import se.raek.ahsa.ast.Statement.ValueDefinition;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.Expression.Constant;
@@ -20,6 +25,8 @@ import se.raek.ahsa.ast.Expression.ArithmeticOperation;
 import se.raek.ahsa.ast.Statement.Conditional;
 import se.raek.ahsa.ast.Statement.VariableAssignment;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.BuiltInFunctions;
+import se.raek.ahsa.runtime.ControlAction;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
 import se.raek.ahsa.runtime.Value.Boolean;
@@ -33,9 +40,11 @@ import static se.raek.ahsa.ast.RelationalOperator.*;
 public class InterpreterTest {
 
 	private final static Value v1 = Number.make(1.0);
-	private final static Constant c1 = Constant.make(Number.make(1.0));
-	private final static Constant c2 = Constant.make(Number.make(2.0));
-	private final static Constant c3 = Constant.make(Number.make(3.0));
+	private final static Value v2 = Number.make(2.0);
+	private final static Value v3 = Number.make(3.0);
+	private final static Constant c1 = Constant.make(v1);
+	private final static Constant c2 = Constant.make(v2);
+	private final static Constant c3 = Constant.make(v3);
 	private final static Constant c6 = Constant.make(Number.make(6.0));
 	private final static Constant cNull = Constant.make(Null.make());
 	private final static ValueLocation valX = new ValueLocation("x");
@@ -237,6 +246,49 @@ public class InterpreterTest {
 		Interpreter.execute(stmts, sto);
 		assertEquals(Number.make(2.0), sto.lookupVariable(varY));
 	}
+	
+	@Test
+	public void executeReturn() {
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(Statement.Return.make(c1));
+		stmts.add(Statement.Return.make(c2));;
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.Matcher<java.lang.Boolean>() {
+			@Override
+			public java.lang.Boolean caseNext() {
+				return false;
+			}
+			@Override
+			public java.lang.Boolean caseReturn(Value v) {
+				return v.equals(v1);
+			}
+		}));
+	}
+	
+	@Test
+	public void makeAndApplyFunction() {
+		ValueLocation f = new ValueLocation("f");
+		ValueLocation x = new ValueLocation("x");
+		ValueLocation y = new ValueLocation("y");
+		List<Statement> stmts = new ArrayList<Statement>();
+		Expression bodyExpr = ArithmeticOperation.make(ADDITION, ValueLookup.make(x), c1);
+		List<Statement> bodyStmts = Collections.singletonList((Statement) Statement.Return.make(bodyExpr));
+		stmts.add(ValueDefinition.make(f, FunctionAbstraction.make(Collections.singletonList(x), bodyStmts)));
+		Expression fExpr = ValueLookup.make(f);
+		List<Expression> params = Collections.<Expression>singletonList(c2);
+		stmts.add(ValueDefinition.make(y, FunctionApplication.make(fExpr, params)));
+		Store sto = new Store();
+		Interpreter.execute(stmts, sto);
+		assertEquals(v3, sto.lookupValue(y));
+	}
+	
+	@Test(expected=CastException.class)
+	public void applyNonFunction() {
+		Expression function = cNull;
+		List<Expression> params = Collections.emptyList();
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(ThrowawayExpression.make(FunctionApplication.make(function, params)));
+		Interpreter.execute(stmts, new Store());
+	}
 
 	@Test
 	public void typeNameNull() {
@@ -251,6 +303,11 @@ public class InterpreterTest {
 	@Test
 	public void typeNameNumber() {
 		assertEquals("number", Interpreter.typeName(Number.make(1.0)));
+	}
+
+	@Test
+	public void typeNameFunction() {
+		assertEquals("function", Interpreter.typeName(Value.Function.make(BuiltInFunctions.print)));
 	}
 	
 	@Test
@@ -281,6 +338,11 @@ public class InterpreterTest {
 	@Test
 	public void isTruthyNumberNegative() {
 		assertTrue(Interpreter.isTruthy(Number.make(-1.0)));
+	}
+	
+	@Test
+	public void isTruthyFunction() {
+		assertTrue(Interpreter.isTruthy(Value.Function.make(BuiltInFunctions.print)));
 	}
 
 }

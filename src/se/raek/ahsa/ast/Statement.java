@@ -11,6 +11,7 @@ public interface Statement {
 		T caseValueDefinition(ValueLocation val, Expression expr);
 		T caseVariableAssignment(VariableLocation var, Expression expr);
 		T caseConditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts);
+		T caseReturn(Expression expr);
 	}
 	
 	public static final class ThrowawayExpression implements Statement {
@@ -183,6 +184,44 @@ public interface Statement {
 		@Override
 		public String toString() {
 			return "Conditional(" + cond + ", " + thenStmts + ", " + elseStmts + ")";
+		}
+		
+	}
+	
+	public static final class Return implements Statement {
+		
+		private final Expression expr;
+		
+		private Return(Expression expr) {
+			if (expr == null) throw new NullPointerException();
+			this.expr = expr;
+		}
+		
+		public static Return make(Expression expr) {
+			return new Return(expr);
+		}
+
+		@Override
+		public <T> T matchStatement(Matcher<T> m) {
+			return m.caseReturn(expr);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof ThrowawayExpression)) return false;
+			Return otherReturn = (Return) otherObject;
+			return expr.equals(otherReturn.expr);
+		}
+		
+		@Override
+		public int hashCode() {
+			return expr.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return "Return(" + expr + ")";
 		}
 		
 	}

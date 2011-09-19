@@ -23,6 +23,10 @@ public class ValueTest {
 			public Boolean caseNumber(double n) {
 				return false;
 			}
+			@Override
+			public Boolean caseFunction(Function fn) {
+				return false;
+			}
 		}));
 	}
 
@@ -39,6 +43,10 @@ public class ValueTest {
 			}
 			@Override
 			public Boolean caseNumber(double n) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunction(Function fn) {
 				return false;
 			}
 		}));
@@ -59,6 +67,10 @@ public class ValueTest {
 			public Boolean caseNumber(double n) {
 				return false;
 			}
+			@Override
+			public Boolean caseFunction(Function fn) {
+				return false;
+			}
 		}));
 	}
 
@@ -77,6 +89,10 @@ public class ValueTest {
 			@Override
 			public Boolean caseNumber(double n) {
 				return n == x;
+			}
+			@Override
+			public Boolean caseFunction(Function fn) {
+				return false;
 			}
 		}));
 	}

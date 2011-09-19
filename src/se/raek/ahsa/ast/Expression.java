@@ -1,5 +1,7 @@
 package se.raek.ahsa.ast;
 
+import java.util.List;
+
 import se.raek.ahsa.runtime.Value;
 
 public interface Expression {
@@ -13,6 +15,8 @@ public interface Expression {
 		T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right);
 		T caseEqualityOperation(EqualityOperator op, Expression left, Expression right);
 		T caseRelationalOperation(RelationalOperator op, Expression left, Expression right);
+		T caseFunctionApplicaion(Expression function, List<Expression> parameters);
+		T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body);
 	}
 	
 	public static final class Constant implements Expression {
@@ -269,6 +273,94 @@ public interface Expression {
 		@Override
 		public String toString() {
 			return "RelationalOperation(" + op + ", " + left + ", " + right + ")";
+		}
+		
+	}
+	
+	public static final class FunctionApplication implements Expression {
+		
+		public final Expression function;
+		public final List<Expression> parameters;
+		
+		private FunctionApplication(Expression function, List<Expression> parameters) {
+			if (function == null || parameters == null) throw new NullPointerException();
+			this.function = function;
+			this.parameters = parameters;
+		}
+		
+		public static FunctionApplication make(Expression function, List<Expression> parameters) {
+			return new FunctionApplication(function, parameters);
+		}
+
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseFunctionApplicaion(function, parameters);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof FunctionApplication)) return false;
+			FunctionApplication otherApp = (FunctionApplication) otherObject;
+			return function.equals(otherApp.function) &&
+					parameters.equals(otherApp.parameters);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + function.hashCode();
+			result = 31 * result + parameters.hashCode();
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "FunctionApplication(" + function + ", " + parameters + ")";
+		}
+		
+	}
+	
+	public static final class FunctionAbstraction implements Expression {
+		
+		public final List<ValueLocation> parameters;
+		public final List<Statement> body;
+		
+		private FunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+			if (parameters == null || body == null) throw new NullPointerException();
+			this.parameters = parameters;
+			this.body = body;
+		}
+		
+		public static FunctionAbstraction make(List<ValueLocation> parameters, List<Statement> body) {
+			return new FunctionAbstraction(parameters, body);
+		}
+
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseFunctionAbstraction(parameters, body);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof FunctionAbstraction)) return false;
+			FunctionAbstraction otherAbs = (FunctionAbstraction) otherObject;
+			return parameters.equals(otherAbs.parameters) &&
+					body.equals(otherAbs.body);
+		}
+		
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + parameters.hashCode();
+			result = 31 * result + body.hashCode();
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "FunctionAbstraction(" + parameters + ", " + body + ")";
 		}
 		
 	}

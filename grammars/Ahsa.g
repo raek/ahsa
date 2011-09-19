@@ -104,7 +104,15 @@ statement returns [List<Statement> stmts]
   | '{'        { envStack.enterScope(Environment.Type.BLOCK); }
     statements { $stmts = $statements.stmts; }
     '}'        { envStack.exitScope(); }
+  | 'return' expression ';' { $stmts.add(Statement.Return.make($expression.expr)); }
 	;
+
+expressions returns [List<Expression> exprs]
+  @init{ $exprs = new ArrayList<Expression>(); }
+  : (e1=expression { $exprs.add($e1.expr); }
+      (',' e2=expression { $exprs.add($e2.expr); } )*
+      )?
+  ;
 
 expression returns [Expression expr]
   : e1=expr1           { $expr = $e1.expr; }
@@ -131,8 +139,15 @@ expr3 returns [Expression expr]
 	;
 
 expr4 returns [Expression expr]
+  : e=expr5                 { $expr = $e.expr; }
+    ('(' es=expressions ')' { $expr = Expression.FunctionApplication.make($expr, $es.exprs); }
+    )*
+  ;
+
+expr5 returns [Expression expr]
 	: c=constant		       { $expr = Expression.Constant.make($c.v); }
 	| l=lookup             { $expr = $l.expr; }
+	| fn=lambda            { $expr = $fn.expr; }
 	| '(' e=expression ')' { $expr = $e.expr; }
 	;
 
@@ -165,6 +180,28 @@ lookup returns [Expression expr]
         }
       });
     }
+  ;
+
+lambda returns [Expression expr]
+  : 'fn'             { envStack.enterScope(Environment.Type.BLOCK); }
+    '('
+    ps=parameters
+    ')'
+    '{'
+    stmts=statements { $expr = Expression.FunctionAbstraction.make($ps.vals, $stmts.stmts); }
+    '}'              { envStack.exitScope(); }
+  ;
+
+parameters returns [List<ValueLocation> vals]
+  @init{ $vals = new ArrayList<ValueLocation>(); }
+  : (p1=parameter       { vals.add($p1.val); }
+      (',' p2=parameter { vals.add($p2.val); }
+      )*
+    )?
+  ;
+
+parameter returns [ValueLocation val]
+  : ID { $val = envStack.getCurrent().installValue($ID.text); }
   ;
 
 eq_op returns [EqualityOperator op]

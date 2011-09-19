@@ -8,6 +8,7 @@ public interface Value {
 		T caseNull();
 		T caseBoolean(boolean b);
 		T caseNumber(double n);
+		T caseFunction(se.raek.ahsa.runtime.Function fn);
 	}
 
 	public static final class Null implements Value {
@@ -96,6 +97,44 @@ public interface Value {
 		}
 	}
 	
+	public static final class Function implements Value {
+		
+		public final se.raek.ahsa.runtime.Function fn;
+		
+		private Function(se.raek.ahsa.runtime.Function fn) {
+			if (fn == null) throw new NullPointerException();
+			this.fn = fn;
+		}
+		
+		public static Function make(se.raek.ahsa.runtime.Function fn) {
+			return new Function(fn);
+		}
+
+		@Override
+		public <T> T matchValue(Matcher<T> m) {
+			return m.caseFunction(fn);
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Function)) return false;
+			Function otherFunction = (Function) otherObject;
+			return fn.equals(otherFunction.fn);
+		}
+		
+		@Override
+		public int hashCode() {
+			return fn.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return "Function(" + fn + ")";
+		}
+		
+	}
+	
 	public static abstract class AbstractMatcher<T> implements Matcher<T> {
 		
 		public abstract T otherwise();
@@ -112,6 +151,11 @@ public interface Value {
 
 		@Override
 		public T caseNumber(double n) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseFunction(se.raek.ahsa.runtime.Function fn) {
 			return otherwise();
 		}
 		

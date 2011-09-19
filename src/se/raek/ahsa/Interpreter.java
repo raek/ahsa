@@ -1,5 +1,6 @@
 package se.raek.ahsa;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import se.raek.ahsa.ast.EqualityOperator;
@@ -9,10 +10,15 @@ import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.CompoundFunction;
+import se.raek.ahsa.runtime.ControlAction;
+import se.raek.ahsa.runtime.ControlAction.Return;
+import se.raek.ahsa.runtime.Function;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
+import se.raek.ahsa.runtime.ControlAction.Next;
 
-public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher<Void> {
+public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher<ControlAction> {
 	
 	private final Store sto;
 	
@@ -24,15 +30,13 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		return expr.matchExpression(new Interpreter(sto));
 	}
 	
-	public static void execute(Statement stmt, Store sto) {
-		stmt.matchStatement(new Interpreter(sto));
+	public static ControlAction execute(Statement stmt, Store sto) {
+		return stmt.matchStatement(new Interpreter(sto));
 	}
 	
-	public static void execute(List<Statement> stmts, Store sto) {
+	public static ControlAction execute(List<Statement> stmts, Store sto) {
 		Interpreter interp = new Interpreter(sto);
-		for (Statement stmt : stmts) {
-			stmt.matchStatement(interp);
-		}
+		return interp.executeStatements(stmts);
 	}
 	
 	public static class CastException extends RuntimeException {
@@ -59,6 +63,10 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			public String caseNumber(double n) {
 				return "number";
 			}
+			@Override
+			public String caseFunction(Function fn) {
+				return "function";
+			}
 		});
 	}
 	
@@ -71,6 +79,19 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			@Override
 			public Double otherwise() {
 				throw new CastException("number", typeName(v));
+			}
+		});
+	}
+	
+	public static Function castToFunction(final Value v) {
+		return v.matchValue(new Value.AbstractMatcher<Function>() {
+			@Override
+			public Function caseFunction(Function fn) {
+				return fn;
+			}
+			@Override
+			public Function otherwise() {
+				throw new CastException("function", typeName(v));
 			}
 		});
 	}
@@ -90,6 +111,20 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 				return true;
 			}
 		});
+	}
+	
+	private ControlAction executeStatements(List<Statement> stmts) {
+		for (Statement stmt : stmts) {
+			ControlAction action = stmt.matchStatement(this);
+			if (action instanceof Next) {
+				continue;
+			} else if (action instanceof Return) {
+				return action;
+			} else {
+				throw new AssertionError("inexhaustive match");
+			}
+		}
+		return Next.make();
 	}
 
 	@Override
@@ -177,37 +212,55 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	}
 
 	@Override
-	public Void caseThrowawayExpression(Expression expr) {
-		expr.matchExpression(this); // Expression value is thrown away
-		return null;
+	public Value caseFunctionApplicaion(Expression function,
+			List<Expression> parameters) {
+		Value evaledFunction = function.matchExpression(this);
+		Function fn = castToFunction(evaledFunction);
+		List<Value> evaledParams = new ArrayList<Value>();
+		for (Expression expr : parameters) {
+			evaledParams.add(expr.matchExpression(this));
+		}
+		return fn.apply(evaledParams);
 	}
 
 	@Override
-	public Void caseValueDefinition(ValueLocation val, Expression expr) {
+	public Value caseFunctionAbstraction(List<ValueLocation> parameters,
+			List<Statement> body) {
+		return Value.Function.make(new CompoundFunction(parameters, body, sto));
+	}
+
+	@Override
+	public ControlAction caseThrowawayExpression(Expression expr) {
+		expr.matchExpression(this);
+		return Next.make();
+	}
+
+	@Override
+	public ControlAction caseValueDefinition(ValueLocation val, Expression expr) {
 		Value result = expr.matchExpression(this);
 		sto.defineValue(val, result);
-		return null;
+		return Next.make();
 	}
 
 	@Override
-	public Void caseVariableAssignment(VariableLocation var, Expression expr) {
+	public ControlAction caseVariableAssignment(VariableLocation var, Expression expr) {
 		Value result = expr.matchExpression(this);
 		sto.assignVariable(var, result);
-		return null;
+		return Next.make();
 	}
 
 	@Override
-	public Void caseConditional(Expression cond, List<Statement> thenStmts,
+	public ControlAction caseConditional(Expression cond, List<Statement> thenStmts,
 			List<Statement> elseStmts) {
 		if (isTruthy(cond.matchExpression(this))) {
-			for (Statement stmt : thenStmts) {
-				stmt.matchStatement(this);
-			}
+			return executeStatements(thenStmts);
 		} else {
-			for (Statement stmt : elseStmts) {
-				stmt.matchStatement(this);
-			}
+			return executeStatements(elseStmts);
 		}
-		return null;
+	}
+
+	@Override
+	public ControlAction caseReturn(Expression expr) {
+		return Return.make(expr.matchExpression(this));
 	}
 }

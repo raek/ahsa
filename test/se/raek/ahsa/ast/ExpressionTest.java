@@ -2,14 +2,20 @@ package se.raek.ahsa.ast;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+import java.util.List;
+
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Expression.Constant;
 import se.raek.ahsa.ast.Expression.ArithmeticOperation;
 import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.Expression.EqualityOperation;
+import se.raek.ahsa.ast.Expression.FunctionAbstraction;
+import se.raek.ahsa.ast.Expression.FunctionApplication;
 import se.raek.ahsa.ast.Expression.RelationalOperation;
 import se.raek.ahsa.ast.Expression.ValueLookup;
 import se.raek.ahsa.ast.Expression.VariableLookup;
+import se.raek.ahsa.ast.Statement.Return;
 import se.raek.ahsa.runtime.Value;
 
 import org.junit.Test;
@@ -51,6 +57,16 @@ public class ExpressionTest {
 					Expression left, Expression right) {
 				return false;
 			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return false;
+			}
 		}));
 	}
 
@@ -84,6 +100,16 @@ public class ExpressionTest {
 					Expression left, Expression right) {
 				return false;
 			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return false;
+			}
 		}));
 	}
 
@@ -115,6 +141,16 @@ public class ExpressionTest {
 			@Override
 			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
 				return false;
 			}
 		}));
@@ -152,6 +188,16 @@ public class ExpressionTest {
 					Expression left, Expression right) {
 				return false;
 			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return false;
+			}
 		}));
 	}
 
@@ -185,6 +231,16 @@ public class ExpressionTest {
 			@Override
 			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
 				return false;
 			}
 		}));
@@ -221,6 +277,108 @@ public class ExpressionTest {
 			public Boolean caseRelationalOperation(RelationalOperator op,
 					Expression left, Expression right) {
 				return true;
+			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchFunctionApplication() {
+		final Expression function0 = Constant.make(Value.Null.make());
+		final List<Expression> parameters0 = Collections.emptyList();
+		Expression expr = FunctionApplication.make(function0, parameters0);
+		assertTrue(expr.matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return function.equals(function0) && parameters.equals(parameters0);
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return false;
+			}
+		}));
+	}
+
+	@Test
+	public void matchFunctionAbstraction() {
+		final List<ValueLocation> parameters0 = Collections.emptyList();
+		final List<Statement> body0 = Collections.singletonList((Statement) Return.make(Constant.make(Value.Null.make())));
+		Expression expr = FunctionAbstraction.make(parameters0, body0);
+		assertTrue(expr.matchExpression(new Expression.Matcher<Boolean>() {
+			@Override
+			public Boolean caseConstant(Value v) {
+				return false;
+			}
+			@Override
+			public Boolean caseValueLookup(ValueLocation val) {
+				return false;
+			}
+			@Override
+			public Boolean caseVariableLookup(VariableLocation var) {
+				return false;
+			}
+			@Override
+			public Boolean caseArithmeticOperation(ArithmeticOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseEqualityOperation(EqualityOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseRelationalOperation(RelationalOperator op,
+					Expression left, Expression right) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionApplicaion(Expression function,
+					List<Expression> parameters) {
+				return false;
+			}
+			@Override
+			public Boolean caseFunctionAbstraction(
+					List<ValueLocation> parameters, List<Statement> body) {
+				return parameters.equals(parameters0) && body.equals(body0);
 			}
 		}));
 	}

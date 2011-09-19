@@ -42,6 +42,10 @@ public class StatementTest {
 					List<Statement> thenStmts, List<Statement> elseStmts) {
 				return false;
 			}
+			@Override
+			public Boolean caseReturn(Expression expr) {
+				return false;
+			}
 		}));
 	}
 
@@ -69,6 +73,10 @@ public class StatementTest {
 					List<Statement> thenStmts, List<Statement> elseStmts) {
 				return false;
 			}
+			@Override
+			public Boolean caseReturn(Expression expr) {
+				return false;
+			}
 		}));
 	}
 
@@ -94,6 +102,10 @@ public class StatementTest {
 			@Override
 			public Boolean caseConditional(Expression cond,
 					List<Statement> thenStmts, List<Statement> elseStmts) {
+				return false;
+			}
+			@Override
+			public Boolean caseReturn(Expression expr) {
 				return false;
 			}
 		}));
@@ -125,6 +137,10 @@ public class StatementTest {
 			public Boolean caseConditional(Expression cond,
 					List<Statement> thenStmts, List<Statement> elseStmts) {
 				return cond.equals(cond0) && thenStmts.equals(thenStmts0) && elseStmts.equals(elseStmts0);
+			}
+			@Override
+			public Boolean caseReturn(Expression expr) {
+				return false;
 			}
 		}));
 	}

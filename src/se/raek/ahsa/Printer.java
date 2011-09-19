@@ -11,6 +11,7 @@ import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Function;
 import se.raek.ahsa.runtime.Value;
 
 public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, Statement.Matcher<Void> {
@@ -82,6 +83,12 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 	@Override
 	public Void caseNumber(double n) {
 		writer.print(n);
+		return null;
+	}
+
+	@Override
+	public Void caseFunction(Function fn) {
+		writer.print("#<fn>");
 		return null;
 	}
 
@@ -189,6 +196,19 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 	}
 
 	@Override
+	public Void caseFunctionApplicaion(Expression function, List<Expression> parameters) {
+		writer.print("#<function application>");
+		return null;
+	}
+
+	@Override
+	public Void caseFunctionAbstraction(List<ValueLocation> parameters,
+			List<Statement> body) {
+		writer.print("#<function abstraction>");
+		return null;
+	}
+
+	@Override
 	public Void caseThrowawayExpression(Expression expr) {
 		expr.matchExpression(this);
 		writer.print(";");
@@ -225,6 +245,14 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 			stmt.matchStatement(this);
 		}
 		writer.print("}");
+		return null;
+	}
+
+	@Override
+	public Void caseReturn(Expression expr) {
+		writer.print("return ");
+		expr.matchExpression(this);
+		writer.print(";");
 		return null;
 	}
 
