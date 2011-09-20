@@ -68,69 +68,57 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return sw.toString();
 	}
 
-	@Override
 	public Void caseNull() {
 		writer.print("null");
 		return null;
 	}
 
-	@Override
 	public Void caseBoolean(boolean b) {
 		writer.print(b ? "true" : "false");
 		return null;
 	}
 
-	@Override
 	public Void caseNumber(double n) {
 		writer.print(n);
 		return null;
 	}
 
-	@Override
 	public Void caseFunction(Function fn) {
 		writer.print("#<fn>");
 		return null;
 	}
 
-	@Override
 	public Void caseConstant(Value v) {
 		v.matchValue(this);
 		return null;
 	}
 
-	@Override
 	public Void caseValueLookup(ValueLocation val) {
 		writer.print(val.label);
 		return null;
 	}
 
-	@Override
 	public Void caseVariableLookup(VariableLocation var) {
 		writer.print(var.label);
 		return null;
 	}
 
-	@Override
 	public Void caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
 		writer.print("(");
 		left.matchExpression(this);
 		op.matchArithmeticOperator(new ArithmeticOperator.Matcher<Void>() {
-			@Override
 			public Void caseAddition() {
 				writer.print("+");
 				return null;
 			}
-			@Override
 			public Void caseSubtraction() {
 				writer.print("-");
 				return null;
 			}
-			@Override
 			public Void caseMultiplication() {
 				writer.print("*");
 				return null;
 			}
-			@Override
 			public Void caseDivision() {
 				writer.print("/");
 				return null;
@@ -141,18 +129,15 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseEqualityOperation(EqualityOperator op, Expression left,
 			Expression right) {
 		writer.print("(");
 		left.matchExpression(this);
 		op.matchEqualityOperator(new EqualityOperator.Matcher<Void>() {
-			@Override
 			public Void caseEqual() {
 				writer.print("==");
 				return null;
 			}
-			@Override
 			public Void caseUnequal() {
 				writer.print("!=");
 				return null;
@@ -163,28 +148,23 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseRelationalOperation(RelationalOperator op, Expression left,
 			Expression right) {
 		writer.print("(");
 		left.matchExpression(this);
 		op.matchRelationalOperator(new RelationalOperator.Matcher<Void>() {
-			@Override
 			public Void caseGreater() {
 				writer.print(">");
 				return null;
 			}
-			@Override
 			public Void caseLess() {
 				writer.print("<");
 				return null;
 			}
-			@Override
 			public Void caseGreaterEqual() {
 				writer.print(">=");
 				return null;
 			}
-			@Override
 			public Void caseLessEqual() {
 				writer.print("<=");
 				return null;
@@ -195,27 +175,23 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseFunctionApplication(Expression function, List<Expression> parameters) {
 		writer.print("#<function application>");
 		return null;
 	}
 
-	@Override
 	public Void caseFunctionAbstraction(List<ValueLocation> parameters,
 			List<Statement> body) {
 		writer.print("#<function abstraction>");
 		return null;
 	}
 
-	@Override
 	public Void caseThrowawayExpression(Expression expr) {
 		expr.matchExpression(this);
 		writer.print(";");
 		return null;
 	}
 
-	@Override
 	public Void caseValueDefinition(ValueLocation val, Expression expr) {
 		writer.printf("val %s=", val.label);
 		expr.matchExpression(this);
@@ -223,7 +199,6 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseVariableAssignment(VariableLocation var, Expression expr) {
 		writer.printf("%s=", var.label);
 		expr.matchExpression(this);
@@ -231,7 +206,6 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseConditional(Expression cond, List<Statement> thenStmts,
 			List<Statement> elseStmts) {
 		writer.print("if ");
@@ -248,7 +222,6 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	@Override
 	public Void caseReturn(Expression expr) {
 		writer.print("return ");
 		expr.matchExpression(this);

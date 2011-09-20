@@ -24,27 +24,22 @@ public abstract class Statement {
 
 		public abstract T otherwise();
 
-		@Override
 		public T caseThrowawayExpression(Expression expr) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseValueDefinition(ValueLocation val, Expression expr) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseVariableAssignment(VariableLocation var, Expression expr) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseConditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseReturn(Expression expr) {
 			return otherwise();
 		}

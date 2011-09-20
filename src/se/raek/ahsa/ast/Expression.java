@@ -31,42 +31,34 @@ public abstract class Expression {
 
 		public abstract T otherwise();
 
-		@Override
 		public T caseConstant(Value v) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseValueLookup(ValueLocation val) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseVariableLookup(VariableLocation val) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseEqualityOperation(EqualityOperator op, Expression left, Expression right) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseRelationalOperation(RelationalOperator op, Expression left, Expression right) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseFunctionApplication(Expression function, List<Expression> parameters) {
 			return otherwise();
 		}

@@ -90,19 +90,15 @@ statement returns [List<Statement> stmts]
       final String label = $ID.text;
       Identifier id = envStack.getCurrent().resolve(label);
       VariableLocation var = id.matchIdentifier(new Identifier.Matcher<VariableLocation>() {
-        @Override
         public VariableLocation caseUnbound() {
           throw new RuntimeException("Unbound identifier: " + label);
         }
-        @Override
         public VariableLocation caseValue(ValueLocation val) {
           throw new RuntimeException("Cannot assign named value: " + label);
         }
-        @Override
         public VariableLocation caseVariable(VariableLocation var) {
           return var;
         }
-        @Override
         public VariableLocation caseInaccessibleVariable(VariableLocation var) {
           throw new RuntimeException("Variable inaccessible from here: " + var.label);
         }
@@ -170,19 +166,15 @@ lookup returns [Expression expr]
       final String label = $ID.text;
       Identifier id = envStack.getCurrent().resolve(label);
       $expr = id.matchIdentifier(new Identifier.Matcher<Expression>() {
-        @Override
         public Expression caseUnbound() {
           throw new RuntimeException("Unbound identifier: " + label);
         }
-        @Override
         public Expression caseValue(ValueLocation val) {
           return makeValueLookup(val);
         }
-        @Override
         public Expression caseVariable(VariableLocation var) {
           return makeVariableLookup(var);
         }
-        @Override
         public Expression caseInaccessibleVariable(VariableLocation var) {
           throw new RuntimeException("Variable inaccessible from here: " + var.label);
         }

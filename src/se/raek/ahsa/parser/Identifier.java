@@ -21,22 +21,18 @@ public abstract class Identifier {
 
 		public abstract T otherwise();
 
-		@Override
 		public T caseUnbound() {
 			return otherwise();
 		}
 
-		@Override
 		public T caseValue(ValueLocation val) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseVariable(VariableLocation var) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseInaccessibleVariable(VariableLocation var) {
 			return otherwise();
 		}

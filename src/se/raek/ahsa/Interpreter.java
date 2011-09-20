@@ -49,19 +49,15 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	
 	public static String typeName(final Value v) {
 		return v.matchValue(new Value.Matcher<String>() {
-			@Override
 			public String caseNull() {
 				return "null";
 			}
-			@Override
 			public String caseBoolean(boolean b) {
 				return "boolean";
 			}
-			@Override
 			public String caseNumber(double n) {
 				return "number";
 			}
-			@Override
 			public String caseFunction(Function fn) {
 				return "function";
 			}
@@ -70,11 +66,9 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	
 	public static double castToNumber(final Value v) {
 		return v.matchValue(new Value.AbstractMatcher<Double>() {
-			@Override
 			public Double caseNumber(double n) {
 				return n;
 			}
-			@Override
 			public Double otherwise() {
 				throw new CastException("number", typeName(v));
 			}
@@ -83,11 +77,9 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	
 	public static Function castToFunction(final Value v) {
 		return v.matchValue(new Value.AbstractMatcher<Function>() {
-			@Override
 			public Function caseFunction(Function fn) {
 				return fn;
 			}
-			@Override
 			public Function otherwise() {
 				throw new CastException("function", typeName(v));
 			}
@@ -96,15 +88,12 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	
 	public static boolean isTruthy(final Value v) {
 		return v.matchValue(new Value.AbstractMatcher<Boolean>() {
-			@Override
 			public Boolean caseNull() {
 				return false;
 			}
-			@Override
 			public Boolean caseBoolean(boolean b) {
 				return b;
 			}
-			@Override
 			public Boolean otherwise() {
 				return true;
 			}
@@ -113,11 +102,9 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	
 	private boolean shouldExit(ControlAction action) {
 		return action.matchControlAction(new ControlAction.Matcher<Boolean>() {
-			@Override
 			public Boolean caseNext() {
 				return false;
 			}
-			@Override
 			public Boolean caseReturn(Value v) {
 				return true;
 			}
@@ -134,64 +121,52 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		return ControlAction.makeNext();
 	}
 
-	@Override
 	public Value caseConstant(Value v) {
 		return v;
 	}
 
-	@Override
 	public Value caseValueLookup(ValueLocation val) {
 		return sto.lookupValue(val);
 	}
 
-	@Override
 	public Value caseVariableLookup(VariableLocation var) {
 		return sto.lookupVariable(var);
 	}
 
-	@Override
 	public Value caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
 		Value leftValue = left.matchExpression(this);
 		Value rightValue = right.matchExpression(this);
 		final double leftNumber = castToNumber(leftValue);
 		final double rightNumber = castToNumber(rightValue);
 		return Value.makeNumber(op.matchArithmeticOperator(new ArithmeticOperator.Matcher<Double>() {
-			@Override
 			public Double caseAddition() {
 				return leftNumber + rightNumber;
 			}
-			@Override
 			public Double caseSubtraction() {
 				return leftNumber - rightNumber;
 			}
-			@Override
 			public Double caseMultiplication() {
 				return leftNumber * rightNumber;
 			}
-			@Override
 			public Double caseDivision() {
 				return leftNumber / rightNumber;
 			}
 		}));
 	}
 
-	@Override
 	public Value caseEqualityOperation(EqualityOperator op, Expression left, Expression right) {
 		final Value leftValue = left.matchExpression(this);
 		final Value rightValue = right.matchExpression(this);
 		return Value.makeBoolean(op.matchEqualityOperator(new EqualityOperator.Matcher<Boolean>() {
-			@Override
 			public Boolean caseEqual() {
 				return leftValue.equals(rightValue);
 			}
-			@Override
 			public Boolean caseUnequal() {
 				return !leftValue.equals(rightValue);
 			}
 		}));
 	}
 
-	@Override
 	public Value caseRelationalOperation(RelationalOperator op,
 			Expression left, Expression right) {
 		Value leftValue = left.matchExpression(this);
@@ -199,26 +174,21 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		final double leftNumber = castToNumber(leftValue);
 		final double rightNumber = castToNumber(rightValue);
 		return Value.makeBoolean(op.matchRelationalOperator(new RelationalOperator.Matcher<Boolean>() {
-			@Override
 			public Boolean caseGreater() {
 				return leftNumber > rightNumber;
 			}
-			@Override
 			public Boolean caseLess() {
 				return leftNumber < rightNumber;
 			}
-			@Override
 			public Boolean caseGreaterEqual() {
 				return leftNumber >= rightNumber;
 			}
-			@Override
 			public Boolean caseLessEqual() {
 				return leftNumber <= rightNumber;
 			}
 		}));
 	}
 
-	@Override
 	public Value caseFunctionApplication(Expression function,
 			List<Expression> parameters) {
 		Value evaledFunction = function.matchExpression(this);
@@ -230,33 +200,28 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		return fn.apply(evaledParams);
 	}
 
-	@Override
 	public Value caseFunctionAbstraction(List<ValueLocation> parameters,
 			List<Statement> body) {
 		return Value.makeFunction(new CompoundFunction(parameters, body, sto));
 	}
 
-	@Override
 	public ControlAction caseThrowawayExpression(Expression expr) {
 		expr.matchExpression(this);
 		return ControlAction.makeNext();
 	}
 
-	@Override
 	public ControlAction caseValueDefinition(ValueLocation val, Expression expr) {
 		Value result = expr.matchExpression(this);
 		sto.defineValue(val, result);
 		return ControlAction.makeNext();
 	}
 
-	@Override
 	public ControlAction caseVariableAssignment(VariableLocation var, Expression expr) {
 		Value result = expr.matchExpression(this);
 		sto.assignVariable(var, result);
 		return ControlAction.makeNext();
 	}
 
-	@Override
 	public ControlAction caseConditional(Expression cond, List<Statement> thenStmts,
 			List<Statement> elseStmts) {
 		if (isTruthy(cond.matchExpression(this))) {
@@ -266,7 +231,6 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		}
 	}
 
-	@Override
 	public ControlAction caseReturn(Expression expr) {
 		return ControlAction.makeReturn(expr.matchExpression(this));
 	}

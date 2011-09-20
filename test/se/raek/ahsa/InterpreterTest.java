@@ -241,11 +241,9 @@ public class InterpreterTest {
 		stmts.add(makeReturn(c1));
 		stmts.add(makeReturn(c2));;
 		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.Matcher<java.lang.Boolean>() {
-			@Override
 			public java.lang.Boolean caseNext() {
 				return false;
 			}
-			@Override
 			public java.lang.Boolean caseReturn(Value v) {
 				return v.equals(v1);
 			}

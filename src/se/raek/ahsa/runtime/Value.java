@@ -19,22 +19,18 @@ public abstract class Value {
 
 		public abstract T otherwise();
 
-		@Override
 		public T caseNull() {
 			return otherwise();
 		}
 
-		@Override
 		public T caseBoolean(boolean b) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseNumber(double n) {
 			return otherwise();
 		}
 
-		@Override
 		public T caseFunction(se.raek.ahsa.runtime.Function fn) {
 			return otherwise();
 		}

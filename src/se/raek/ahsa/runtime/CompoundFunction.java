@@ -21,7 +21,6 @@ public class CompoundFunction implements Function {
 		this.sto = sto;
 	}
 
-	@Override
 	public Value apply(List<Value> actualParameters) {
 		Store newStore = new Store(sto);
 		Iterator<ValueLocation> formals = formalParameters.iterator();
@@ -34,11 +33,9 @@ public class CompoundFunction implements Function {
 		}
 		ControlAction action = Interpreter.execute(body, newStore);
 		return action.matchControlAction(new Matcher<Value>() {
-			@Override
 			public Value caseNext() {
 				return Value.makeNull();
 			}
-			@Override
 			public Value caseReturn(Value v) {
 				return v;
 			}

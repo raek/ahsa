@@ -9,11 +9,9 @@ public class EqualityOperatorTest {
 	@Test
 	public void matchEqual() {
 		assertTrue(EqualityOperator.EQUAL.matchEqualityOperator(new EqualityOperator.Matcher<Boolean>() {
-			@Override
 			public Boolean caseEqual() {
 				return true;
 			}
-			@Override
 			public Boolean caseUnequal() {
 				return false;
 			}
@@ -23,11 +21,9 @@ public class EqualityOperatorTest {
 	@Test
 	public void matchUnequal() {
 		assertTrue(EqualityOperator.UNEQUAL.matchEqualityOperator(new EqualityOperator.Matcher<Boolean>() {
-			@Override
 			public Boolean caseEqual() {
 				return false;
 			}
-			@Override
 			public Boolean caseUnequal() {
 				return true;
 			}

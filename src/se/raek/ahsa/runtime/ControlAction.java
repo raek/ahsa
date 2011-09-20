@@ -18,12 +18,10 @@ public abstract class ControlAction {
 
 		public abstract T otherwise();
 
-		@Override
 		public T caseNext() {
 			return otherwise();
 		}
 
-		@Override
 		public T caseReturn(Value v) {
 			return otherwise();
 		}
