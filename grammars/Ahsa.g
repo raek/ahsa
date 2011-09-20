@@ -43,49 +43,71 @@ public void resetEnvironment(Environment env) {
 }
 
 program
-	: statements
-	;
+  : statements
+  ;
 
 statements returns [List<Statement> stmts]
   @init{ $stmts = new ArrayList<Statement>(); }
-	: (s=statement { $stmts.addAll($s.stmts); })*
-	;
+  : (s=statement { $stmts.addAll($s.stmts); })*
+  ;
 
 statement returns [List<Statement> stmts]
   @init{ $stmts = new ArrayList<Statement>(); }
-	: e=expression ';' { $stmts.add(makeThrowawayExpression($e.expr)); }
-	| { Expression cond; List<Statement> thenStmts, elseStmts = null; }
-	  'if'
-	  c=expression       { cond = $c.expr; }
-	  '{'
-	  thens=statements   { thenStmts = $thens.stmts; }
-	  '}'
-	  ('else'
-	    '{'
-	    elses=statements { elseStmts = $elses.stmts; }
-	    '}')?
-	  { if (elseStmts == null) {
-	        elseStmts = Collections.emptyList();
-	    } 
-	    $stmts.add(makeConditional(cond, thenStmts, elseStmts));
-	  }
-	| 'val' ID '=' expression ';' {
-	    ValueLocation val = envStack.getCurrent().installValue($ID.text);
-	    $stmts.add(makeValueDefinition(val, $expression.expr));
-	  }
-	| { Expression expr = null; }
-	  'var' ID
-	  ('=' expression
-	    { expr = $expression.expr; }
-	  )?
-	  ';'
-	  {
-	    VariableLocation var = envStack.getCurrent().installVariable($ID.text);
-	    if (expr != null) {
-	      $stmts.add(makeVariableAssignment(var, $expression.expr));
-	    }
-	  }
-  | ID '=' expression ';'
+  : s=throwaway_expression { $stmts.add($s.stmt); }
+  | s=conditional          { $stmts.add($s.stmt); }
+  | s=val                  { $stmts.add($s.stmt); }
+  | s=var                  { if ($s.stmt != null) { $stmts.add($s.stmt); } }
+  | s=assignment           { $stmts.add($s.stmt); }
+  | s=return_statement     { $stmts.add($s.stmt); }
+  | ss=block               { $stmts.addAll($ss.stmts); }
+  ;
+
+throwaway_expression returns [Statement stmt]
+  : e=expression ';' { $stmt = makeThrowawayExpression($e.expr); }
+  ;
+
+conditional returns [Statement stmt]
+  : { Expression cond; List<Statement> thenStmts, elseStmts = null; }
+    'if'
+    c=expression       { cond = $c.expr; }
+    '{'
+    thens=statements   { thenStmts = $thens.stmts; }
+    '}'
+    ('else'
+      '{'
+      elses=statements { elseStmts = $elses.stmts; }
+      '}')?
+    { if (elseStmts == null) {
+          elseStmts = Collections.emptyList();
+      } 
+      $stmt = makeConditional(cond, thenStmts, elseStmts);
+    }
+  ;
+
+val returns [Statement stmt]
+  : 'val' ID '=' expression ';' {
+      ValueLocation val = envStack.getCurrent().installValue($ID.text);
+      $stmt = makeValueDefinition(val, $expression.expr);
+    }
+  ;
+
+var returns [Statement stmt]
+  : { Expression expr = null; }
+    'var' ID
+    ('=' expression
+      { expr = $expression.expr; }
+    )?
+    ';'
+    {
+      VariableLocation var = envStack.getCurrent().installVariable($ID.text);
+      if (expr != null) {
+        $stmt = makeVariableAssignment(var, $expression.expr);
+      }
+    }
+  ;
+
+assignment returns [Statement stmt]
+  : ID '=' expression ';'
     {
       final String label = $ID.text;
       Identifier id = envStack.getCurrent().resolve(label);
@@ -103,13 +125,18 @@ statement returns [List<Statement> stmts]
           throw new RuntimeException("Variable inaccessible from here: " + var.label);
         }
       });
-      $stmts.add(makeVariableAssignment(var, $expression.expr));
+      $stmt = makeVariableAssignment(var, $expression.expr);
     }
-  | '{'        { envStack.enterScope(Environment.Type.BLOCK); }
+  ;
+
+return_statement returns [Statement stmt]
+  : 'return' expression ';' { $stmt = makeReturn($expression.expr); } ;
+
+block returns [List<Statement> stmts]
+  : '{'        { envStack.enterScope(Environment.Type.BLOCK); }
     statements { $stmts = $statements.stmts; }
     '}'        { envStack.exitScope(); }
-  | 'return' expression ';' { $stmts.add(makeReturn($expression.expr)); }
-	;
+  ;
 
 expressions returns [List<Expression> exprs]
   @init{ $exprs = new ArrayList<Expression>(); }
@@ -131,16 +158,16 @@ expr1 returns [Expression expr]
   ;
 
 expr2 returns [Expression expr]
-	: e1=expr3            { $expr = $e1.expr; }
-		(op=add_op e2=expr3 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
-		)*
-	;
+  : e1=expr3            { $expr = $e1.expr; }
+    (op=add_op e2=expr3 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
+    )*
+  ;
 
 expr3 returns [Expression expr]
-	: e1=expr4				  	{ $expr = $e1.expr; }
-		(op=mul_op e2=expr4 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
-		)*
-	;
+  : e1=expr4            { $expr = $e1.expr; }
+    (op=mul_op e2=expr4 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
+    )*
+  ;
 
 expr4 returns [Expression expr]
   : e=expr5                 { $expr = $e.expr; }
@@ -149,17 +176,17 @@ expr4 returns [Expression expr]
   ;
 
 expr5 returns [Expression expr]
-	: c=constant		       { $expr = makeConstant($c.v); }
-	| l=lookup             { $expr = $l.expr; }
-	| fn=lambda            { $expr = $fn.expr; }
-	| '(' e=expression ')' { $expr = $e.expr; }
-	;
+  : c=constant           { $expr = makeConstant($c.v); }
+  | l=lookup             { $expr = $l.expr; }
+  | fn=lambda            { $expr = $fn.expr; }
+  | '(' e=expression ')' { $expr = $e.expr; }
+  ;
 
 constant returns [Value v]
-	: null_literal      { $v = makeNull(); }
-	| b=boolean_literal { $v = makeBoolean($b.b); }
-	| n=number_literal  { $v = makeNumber($n.n); }
-	;
+  : null_literal      { $v = makeNull(); }
+  | b=boolean_literal { $v = makeBoolean($b.b); }
+  | n=number_literal  { $v = makeNumber($n.n); }
+  ;
 
 lookup returns [Expression expr]
   : ID {
@@ -217,25 +244,25 @@ rel_op returns [RelationalOperator op]
   ;
 
 add_op returns [ArithmeticOperator op]
-	: '+' { $op = ADDITION; }
-	| '-' { $op = SUBTRACTION; }
-	;
+  : '+' { $op = ADDITION; }
+  | '-' { $op = SUBTRACTION; }
+  ;
 
 mul_op returns [ArithmeticOperator op]
-	: '*' { $op = MULTIPLICATION; }
-	| '/' { $op = DIVISION; }
-	;
+  : '*' { $op = MULTIPLICATION; }
+  | '/' { $op = DIVISION; }
+  ;
 
 null_literal: 'null' ;
 
 boolean_literal returns [boolean b]
-	: 'true'	{ $b = true; }
-	| 'false'	{ $b = false; }
-	;
+  : 'true'  { $b = true; }
+  | 'false'  { $b = false; }
+  ;
 
 number_literal returns [double n]
-	: NUMBER { $n = Double.valueOf($NUMBER.text); } 
-	;
+  : NUMBER { $n = Double.valueOf($NUMBER.text); } 
+  ;
 
 NUMBER: ('0'|'1'..'9' ('0'..'9')*)('.' ('0'..'9')*)?;
 
