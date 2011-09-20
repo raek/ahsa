@@ -2,7 +2,7 @@ package se.raek.ahsa.ast;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class VariableLocation {
+public final class VariableLocation {
 	
 	public final int id;
 	public final String label;
