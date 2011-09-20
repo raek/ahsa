@@ -1,170 +1,238 @@
 package se.raek.ahsa.ast;
 
 import java.util.List;
-
+import se.raek.ahsa.ast.ValueLocation;
+import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.ast.ArithmeticOperator;
+import se.raek.ahsa.ast.EqualityOperator;
+import se.raek.ahsa.ast.RelationalOperator;
+import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.runtime.Value;
 
-public interface Expression {
-	
-	<T> T matchExpression(Matcher<T> m);
-	
+public abstract class Expression {
+
+	private Expression() {
+	}
+
+	public abstract <T> T matchExpression(Matcher<T> m);
+
 	public interface Matcher<T> {
 		T caseConstant(Value v);
 		T caseValueLookup(ValueLocation val);
-		T caseVariableLookup(VariableLocation var);
+		T caseVariableLookup(VariableLocation val);
 		T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right);
 		T caseEqualityOperation(EqualityOperator op, Expression left, Expression right);
 		T caseRelationalOperation(RelationalOperator op, Expression left, Expression right);
-		T caseFunctionApplicaion(Expression function, List<Expression> parameters);
 		T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body);
+		T caseFunctionApplication(Expression function, List<Expression> parameters);
 	}
-	
-	public static final class Constant implements Expression {
-		
-		public final Value v;
-		
-		private Constant(Value v) {
+
+	public static abstract class AbstractMatcher<T> implements Matcher<T> {
+
+		public abstract T otherwise();
+
+		@Override
+		public T caseConstant(Value v) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseValueLookup(ValueLocation val) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseVariableLookup(VariableLocation val) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseEqualityOperation(EqualityOperator op, Expression left, Expression right) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseRelationalOperation(RelationalOperator op, Expression left, Expression right) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+			return otherwise();
+		}
+
+		@Override
+		public T caseFunctionApplication(Expression function, List<Expression> parameters) {
+			return otherwise();
+		}
+
+	}
+
+	public static Expression makeConstant(Value v) {
+		return new Constant(v);
+	}
+
+	public static Expression makeValueLookup(ValueLocation val) {
+		return new ValueLookup(val);
+	}
+
+	public static Expression makeVariableLookup(VariableLocation val) {
+		return new VariableLookup(val);
+	}
+
+	public static Expression makeArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
+		return new ArithmeticOperation(op, left, right);
+	}
+
+	public static Expression makeEqualityOperation(EqualityOperator op, Expression left, Expression right) {
+		return new EqualityOperation(op, left, right);
+	}
+
+	public static Expression makeRelationalOperation(RelationalOperator op, Expression left, Expression right) {
+		return new RelationalOperation(op, left, right);
+	}
+
+	public static Expression makeFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+		return new FunctionAbstraction(parameters, body);
+	}
+
+	public static Expression makeFunctionApplication(Expression function, List<Expression> parameters) {
+		return new FunctionApplication(function, parameters);
+	}
+
+	private static final class Constant extends Expression {
+
+		private final Value v;
+
+		public Constant(Value v) {
 			if (v == null) throw new NullPointerException();
 			this.v = v;
-		}
-		
-		public static Constant make(Value v) {
-			return new Constant(v);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseConstant(v);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof Constant)) return false;
-			Constant otherConstant = (Constant) otherObject;
-			return v.equals(otherConstant.v);
+			Constant other = (Constant) otherObject;
+			return (v.equals(other.v));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return v.hashCode();
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Constant(" + v + ")";
 		}
 
 	}
-	
-	public static final class ValueLookup implements Expression {
-		
-		public final ValueLocation val;
-		
-		private ValueLookup(ValueLocation val) {
+
+	private static final class ValueLookup extends Expression {
+
+		private final ValueLocation val;
+
+		public ValueLookup(ValueLocation val) {
 			if (val == null) throw new NullPointerException();
 			this.val = val;
 		}
-		
-		public static ValueLookup make(ValueLocation val) {
-			return new ValueLookup(val);
-		}
-		
+
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseValueLookup(val);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
-			 if (this == otherObject) return true;
-			 if (!(otherObject instanceof ValueLookup)) return false;
-			 ValueLookup otherLookup = (ValueLookup) otherObject;
-			 return val.equals(otherLookup.val);
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof ValueLookup)) return false;
+			ValueLookup other = (ValueLookup) otherObject;
+			return (val.equals(other.val));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return val.hashCode();
 		}
-		
+
 		@Override
 		public String toString() {
 			return "ValueLookup(" + val + ")";
 		}
-		
+
 	}
-	
-	public static final class VariableLookup implements Expression {
-		
-		public final VariableLocation var;
-		
-		private VariableLookup(VariableLocation var) {
-			if (var == null) throw new NullPointerException();
-			this.var = var;
+
+	private static final class VariableLookup extends Expression {
+
+		private final VariableLocation val;
+
+		public VariableLookup(VariableLocation val) {
+			if (val == null) throw new NullPointerException();
+			this.val = val;
 		}
-		
-		public static VariableLookup make(VariableLocation var) {
-			return new VariableLookup(var);
-		}
-		
+
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseVariableLookup(var);
+			return m.caseVariableLookup(val);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
-			 if (this == otherObject) return true;
-			 if (!(otherObject instanceof VariableLookup)) return false;
-			 VariableLookup otherLookup = (VariableLookup) otherObject;
-			 return var.equals(otherLookup.var);
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof VariableLookup)) return false;
+			VariableLookup other = (VariableLookup) otherObject;
+			return (val.equals(other.val));
 		}
-		
+
 		@Override
 		public int hashCode() {
-			return var.hashCode();
+			return val.hashCode();
 		}
-		
+
 		@Override
 		public String toString() {
-			return "VariableLookup(" + var + ")";
+			return "VariableLookup(" + val + ")";
 		}
-		
+
 	}
-	
-	public static final class ArithmeticOperation implements Expression {
-		
-		public final ArithmeticOperator op;
-		public final Expression left;
-		public final Expression right;
-		
-		private ArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
+
+	private static final class ArithmeticOperation extends Expression {
+
+		private final ArithmeticOperator op;
+		private final Expression left;
+		private final Expression right;
+
+		public ArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
 			if (op == null || left == null || right == null) throw new NullPointerException();
 			this.op = op;
 			this.left = left;
 			this.right = right;
-		}
-		
-		public static ArithmeticOperation make(ArithmeticOperator op, Expression left, Expression right) {
-			return new ArithmeticOperation(op, left, right);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseArithmeticOperation(op, left, right);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof ArithmeticOperation)) return false;
-			ArithmeticOperation otherBinOp = (ArithmeticOperation) otherObject;
-			return op.equals(otherBinOp.op) &&
-					left.equals(otherBinOp.left) &&
-					right.equals(otherBinOp.right);
+			ArithmeticOperation other = (ArithmeticOperation) otherObject;
+			return (op.equals(other.op)) && (left.equals(other.left)) && (right.equals(other.right));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			int result = 17;
@@ -173,46 +241,40 @@ public interface Expression {
 			result = 31 * result + right.hashCode();
 			return result;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "ArithmeticOperation(" + op + ", " + left + ", " + right + ")";
 		}
-		
+
 	}
-	
-	public static final class EqualityOperation implements Expression {
-		
-		public final EqualityOperator op;
-		public final Expression left;
-		public final Expression right;
-		
-		private EqualityOperation(EqualityOperator op, Expression left, Expression right) {
+
+	private static final class EqualityOperation extends Expression {
+
+		private final EqualityOperator op;
+		private final Expression left;
+		private final Expression right;
+
+		public EqualityOperation(EqualityOperator op, Expression left, Expression right) {
 			if (op == null || left == null || right == null) throw new NullPointerException();
 			this.op = op;
 			this.left = left;
 			this.right = right;
-		}
-		
-		public static EqualityOperation make(EqualityOperator op, Expression left, Expression right) {
-			return new EqualityOperation(op, left, right);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseEqualityOperation(op, left, right);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof EqualityOperation)) return false;
-			EqualityOperation otherBinOp = (EqualityOperation) otherObject;
-			return op.equals(otherBinOp.op) &&
-					left.equals(otherBinOp.left) &&
-					right.equals(otherBinOp.right);
+			EqualityOperation other = (EqualityOperation) otherObject;
+			return (op.equals(other.op)) && (left.equals(other.left)) && (right.equals(other.right));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			int result = 17;
@@ -221,46 +283,40 @@ public interface Expression {
 			result = 31 * result + right.hashCode();
 			return result;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "EqualityOperation(" + op + ", " + left + ", " + right + ")";
 		}
-		
+
 	}
-	
-	public static final class RelationalOperation implements Expression {
-		
-		public final RelationalOperator op;
-		public final Expression left;
-		public final Expression right;
-		
-		private RelationalOperation(RelationalOperator op, Expression left, Expression right) {
+
+	private static final class RelationalOperation extends Expression {
+
+		private final RelationalOperator op;
+		private final Expression left;
+		private final Expression right;
+
+		public RelationalOperation(RelationalOperator op, Expression left, Expression right) {
 			if (op == null || left == null || right == null) throw new NullPointerException();
 			this.op = op;
 			this.left = left;
 			this.right = right;
-		}
-		
-		public static RelationalOperation make(RelationalOperator op, Expression left, Expression right) {
-			return new RelationalOperation(op, left, right);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseRelationalOperation(op, left, right);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof RelationalOperation)) return false;
-			RelationalOperation otherBinOp = (RelationalOperation) otherObject;
-			return op.equals(otherBinOp.op) &&
-					left.equals(otherBinOp.left) &&
-					right.equals(otherBinOp.right);
+			RelationalOperation other = (RelationalOperation) otherObject;
+			return (op.equals(other.op)) && (left.equals(other.left)) && (right.equals(other.right));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			int result = 17;
@@ -269,87 +325,38 @@ public interface Expression {
 			result = 31 * result + right.hashCode();
 			return result;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "RelationalOperation(" + op + ", " + left + ", " + right + ")";
 		}
-		
-	}
-	
-	public static final class FunctionApplication implements Expression {
-		
-		public final Expression function;
-		public final List<Expression> parameters;
-		
-		private FunctionApplication(Expression function, List<Expression> parameters) {
-			if (function == null || parameters == null) throw new NullPointerException();
-			this.function = function;
-			this.parameters = parameters;
-		}
-		
-		public static FunctionApplication make(Expression function, List<Expression> parameters) {
-			return new FunctionApplication(function, parameters);
-		}
 
-		@Override
-		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseFunctionApplicaion(function, parameters);
-		}
-		
-		@Override
-		public boolean equals(Object otherObject) {
-			if (this == otherObject) return true;
-			if (!(otherObject instanceof FunctionApplication)) return false;
-			FunctionApplication otherApp = (FunctionApplication) otherObject;
-			return function.equals(otherApp.function) &&
-					parameters.equals(otherApp.parameters);
-		}
-		
-		@Override
-		public int hashCode() {
-			int result = 17;
-			result = 31 * result + function.hashCode();
-			result = 31 * result + parameters.hashCode();
-			return result;
-		}
-		
-		@Override
-		public String toString() {
-			return "FunctionApplication(" + function + ", " + parameters + ")";
-		}
-		
 	}
-	
-	public static final class FunctionAbstraction implements Expression {
-		
-		public final List<ValueLocation> parameters;
-		public final List<Statement> body;
-		
-		private FunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+
+	private static final class FunctionAbstraction extends Expression {
+
+		private final List<ValueLocation> parameters;
+		private final List<Statement> body;
+
+		public FunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
 			if (parameters == null || body == null) throw new NullPointerException();
 			this.parameters = parameters;
 			this.body = body;
-		}
-		
-		public static FunctionAbstraction make(List<ValueLocation> parameters, List<Statement> body) {
-			return new FunctionAbstraction(parameters, body);
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
 			return m.caseFunctionAbstraction(parameters, body);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof FunctionAbstraction)) return false;
-			FunctionAbstraction otherAbs = (FunctionAbstraction) otherObject;
-			return parameters.equals(otherAbs.parameters) &&
-					body.equals(otherAbs.body);
+			FunctionAbstraction other = (FunctionAbstraction) otherObject;
+			return (parameters.equals(other.parameters)) && (body.equals(other.body));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			int result = 17;
@@ -357,12 +364,51 @@ public interface Expression {
 			result = 31 * result + body.hashCode();
 			return result;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "FunctionAbstraction(" + parameters + ", " + body + ")";
 		}
-		
+
 	}
-	
+
+	private static final class FunctionApplication extends Expression {
+
+		private final Expression function;
+		private final List<Expression> parameters;
+
+		public FunctionApplication(Expression function, List<Expression> parameters) {
+			if (function == null || parameters == null) throw new NullPointerException();
+			this.function = function;
+			this.parameters = parameters;
+		}
+
+		@Override
+		public <T> T matchExpression(Matcher<T> m) {
+			return m.caseFunctionApplication(function, parameters);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof FunctionApplication)) return false;
+			FunctionApplication other = (FunctionApplication) otherObject;
+			return (function.equals(other.function)) && (parameters.equals(other.parameters));
+		}
+
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + function.hashCode();
+			result = 31 * result + parameters.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "FunctionApplication(" + function + ", " + parameters + ")";
+		}
+
+	}
+
 }

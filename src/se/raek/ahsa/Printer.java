@@ -196,7 +196,7 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 	}
 
 	@Override
-	public Void caseFunctionApplicaion(Expression function, List<Expression> parameters) {
+	public Void caseFunctionApplication(Expression function, List<Expression> parameters) {
 		writer.print("#<function application>");
 		return null;
 	}

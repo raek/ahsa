@@ -1,0 +1,7 @@
+(package se.raek.ahsa.runtime)
+
+(import se.raek.ahsa.runtime.Value)
+
+(defadt ControlAction
+  (Next)
+  (Return (Value v)))

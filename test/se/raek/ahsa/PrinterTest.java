@@ -9,73 +9,63 @@ import java.util.List;
 import org.junit.Test;
 
 import se.raek.ahsa.ast.Expression;
-import se.raek.ahsa.ast.Expression.EqualityOperation;
-import se.raek.ahsa.ast.Expression.RelationalOperation;
-import se.raek.ahsa.ast.Expression.ValueLookup;
-import se.raek.ahsa.ast.Expression.VariableLookup;
 import se.raek.ahsa.ast.Statement;
-import se.raek.ahsa.ast.Statement.Conditional;
-import se.raek.ahsa.ast.Statement.ThrowawayExpression;
-import se.raek.ahsa.ast.Statement.ValueDefinition;
-import se.raek.ahsa.ast.Statement.VariableAssignment;
 import se.raek.ahsa.ast.ValueLocation;
-import se.raek.ahsa.ast.Expression.ArithmeticOperation;
-import se.raek.ahsa.ast.Expression.Constant;
 import se.raek.ahsa.ast.VariableLocation;
-import se.raek.ahsa.runtime.Value.Null;
-import se.raek.ahsa.runtime.Value.Number;
-import se.raek.ahsa.runtime.Value.Boolean;
 
+import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
 import static se.raek.ahsa.ast.EqualityOperator.*;
 import static se.raek.ahsa.ast.RelationalOperator.*;
+import static se.raek.ahsa.ast.Statement.*;
+import static se.raek.ahsa.runtime.Value.*;
 
 public class PrinterTest {
 
-	private final Constant left = Constant.make(Number.make(2.0));
-	private final Constant right = Constant.make(Number.make(3.0));
+	private final Expression left = makeConstant(makeNumber(2.0));
+	private final Expression right = makeConstant(makeNumber(3.0));
 
 	@Test
 	public void printNull() {
-		assertEquals("null", Printer.toString(Null.make()));
+		assertEquals("null", Printer.toString(makeNull()));
 	}
 
 	@Test
 	public void printTrue() {
-		assertEquals("true", Printer.toString(Boolean.make(true)));
+		assertEquals("true", Printer.toString(makeBoolean(true)));
 	}
 
 	@Test
 	public void printFalse() {
-		assertEquals("false", Printer.toString(Boolean.make(false)));
+		assertEquals("false", Printer.toString(makeBoolean(false)));
 	}
 
 	@Test
 	public void printNumber() {
 		assertEquals(123.0,
-				Double.valueOf(Printer.toString(Number.make(123.0))), 0.01);
+				Double.valueOf(Printer.toString(makeNumber(123.0))), 0.01);
 	}
 
 	@Test
 	public void printConstant() {
-		assertEquals("null", Printer.toString(Constant.make(Null.make())));
+		assertEquals("null", Printer.toString(makeConstant(makeNull())));
 	}
 
 	@Test
 	public void printValueLookup() {
 		ValueLocation val = new ValueLocation("x");
-		assertEquals("x", Printer.toString(ValueLookup.make(val)));
+		assertEquals("x", Printer.toString(makeValueLookup(val)));
 	}
 
 	@Test
 	public void printVariableLookup() {
 		VariableLocation var = new VariableLocation("y");
-		assertEquals("y", Printer.toString(VariableLookup.make(var)));
+		assertEquals("y", Printer.toString(makeVariableLookup(var)));
 	}
 
 	@Test
 	public void printAddition() {
-		Expression expr = ArithmeticOperation.make(ADDITION, left, right);
+		Expression expr = makeArithmeticOperation(ADDITION, left, right);
 		String expected = "(" + Printer.toString(left) + "+"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -83,7 +73,7 @@ public class PrinterTest {
 
 	@Test
 	public void printSubtraction() {
-		Expression expr = ArithmeticOperation.make(SUBTRACTION, left, right);
+		Expression expr = makeArithmeticOperation(SUBTRACTION, left, right);
 		String expected = "(" + Printer.toString(left) + "-"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -91,7 +81,7 @@ public class PrinterTest {
 
 	@Test
 	public void printMultiplication() {
-		Expression expr = ArithmeticOperation.make(MULTIPLICATION, left, right);
+		Expression expr = makeArithmeticOperation(MULTIPLICATION, left, right);
 		String expected = "(" + Printer.toString(left) + "*"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -99,7 +89,7 @@ public class PrinterTest {
 
 	@Test
 	public void printDivision() {
-		Expression expr = ArithmeticOperation.make(DIVISION, left, right);
+		Expression expr = makeArithmeticOperation(DIVISION, left, right);
 		String expected = "(" + Printer.toString(left) + "/"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -107,7 +97,7 @@ public class PrinterTest {
 
 	@Test
 	public void printEqual() {
-		Expression expr = EqualityOperation.make(EQUAL, left, right);
+		Expression expr = makeEqualityOperation(EQUAL, left, right);
 		String expected = "(" + Printer.toString(left) + "=="
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -115,7 +105,7 @@ public class PrinterTest {
 
 	@Test
 	public void printUnequal() {
-		Expression expr = EqualityOperation.make(UNEQUAL, left, right);
+		Expression expr = makeEqualityOperation(UNEQUAL, left, right);
 		String expected = "(" + Printer.toString(left) + "!="
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -123,7 +113,7 @@ public class PrinterTest {
 
 	@Test
 	public void printGreater() {
-		Expression expr = RelationalOperation.make(GREATER, left, right);
+		Expression expr = makeRelationalOperation(GREATER, left, right);
 		String expected = "(" + Printer.toString(left) + ">"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -131,7 +121,7 @@ public class PrinterTest {
 
 	@Test
 	public void printLess() {
-		Expression expr = RelationalOperation.make(LESS, left, right);
+		Expression expr = makeRelationalOperation(LESS, left, right);
 		String expected = "(" + Printer.toString(left) + "<"
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -139,7 +129,7 @@ public class PrinterTest {
 
 	@Test
 	public void printGreaterEqual() {
-		Expression expr = RelationalOperation.make(GREATER_EQUAL, left, right);
+		Expression expr = makeRelationalOperation(GREATER_EQUAL, left, right);
 		String expected = "(" + Printer.toString(left) + ">="
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -147,7 +137,7 @@ public class PrinterTest {
 
 	@Test
 	public void printLessEqual() {
-		Expression expr = RelationalOperation.make(LESS_EQUAL, left, right);
+		Expression expr = makeRelationalOperation(LESS_EQUAL, left, right);
 		String expected = "(" + Printer.toString(left) + "<="
 				+ Printer.toString(right) + ")";
 		assertEquals(expected, Printer.toString(expr));
@@ -155,41 +145,42 @@ public class PrinterTest {
 
 	@Test
 	public void printThrowawayExpression() {
-		assertEquals("null;", Printer.toString(ThrowawayExpression
-				.make(Constant.make(Null.make()))));
+		assertEquals(
+				"null;",
+				Printer.toString(makeThrowawayExpression(makeConstant(makeNull()))));
 	}
 
 	@Test
 	public void printValueDefinition() {
-		assertEquals("val x=null;", Printer.toString(ValueDefinition.make(
-				new ValueLocation("x"), Constant.make(Null.make()))));
+		assertEquals("val x=null;", Printer.toString(makeValueDefinition(
+				new ValueLocation("x"), makeConstant(makeNull()))));
 	}
 
 	@Test
 	public void printVariableAssignment() {
-		assertEquals("x=null;", Printer.toString(VariableAssignment.make(
-				new VariableLocation("x"), Constant.make(Null.make()))));
+		assertEquals("x=null;", Printer.toString(makeVariableAssignment(
+				new VariableLocation("x"), makeConstant(makeNull()))));
 	}
 
 	@Test
 	public void printConditional() {
 		VariableLocation var = new VariableLocation("x");
-		Expression cond = VariableLookup.make(var);
+		Expression cond = makeVariableLookup(var);
 		List<Statement> thenStmts = Collections
-				.singletonList((Statement) VariableAssignment.make(var,
-						Constant.make(Boolean.make(true))));
+				.singletonList((Statement) makeVariableAssignment(var,
+						makeConstant(makeBoolean(true))));
 		List<Statement> elseStmts = Collections
-				.singletonList((Statement) VariableAssignment.make(var,
-						Constant.make(Boolean.make(false))));
+				.singletonList((Statement) makeVariableAssignment(var,
+						makeConstant(makeBoolean(false))));
 		assertEquals("if x{x=true;}else{x=false;}",
-				Printer.toString(Conditional.make(cond, thenStmts, elseStmts)));
+				Printer.toString(makeConditional(cond, thenStmts, elseStmts)));
 	}
 
 	@Test
 	public void printStatements() {
 		List<Statement> stmts = new ArrayList<Statement>();
-		stmts.add(ThrowawayExpression.make(Constant.make(Boolean.make(true))));
-		stmts.add(ThrowawayExpression.make(Constant.make(Boolean.make(false))));
+		stmts.add(makeThrowawayExpression(makeConstant(makeBoolean(true))));
+		stmts.add(makeThrowawayExpression(makeConstant(makeBoolean(false))));
 		assertEquals("true;false;", Printer.toString(stmts));
 	}
 

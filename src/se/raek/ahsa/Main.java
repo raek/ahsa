@@ -18,7 +18,7 @@ public class Main {
 	}
 	
 	private static void addFunction(Environment env, Store sto, String id, Function fn) {
-		addValue(env, sto, id, Value.Function.make(fn));
+		addValue(env, sto, id, Value.makeFunction(fn));
 	}
 
 	public static void main(String[] args) throws Exception {

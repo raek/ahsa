@@ -1,0 +1,13 @@
+(package se.raek.ahsa.ast)
+
+(import java.util.List)
+(import se.raek.ahsa.ast.Expression)
+(import se.raek.ahsa.ast.ValueLocation)
+(import se.raek.ahsa.ast.VariableLocation)
+
+(defadt Statement
+  (ThrowawayExpression (Expression expr))
+  (ValueDefinition (ValueLocation val) (Expression expr))
+  (VariableAssignment (VariableLocation var) (Expression expr))
+  (Conditional (Expression cond) ((List Statement) thenStmts) ((List Statement) elseStmts))
+  (Return (Expression expr)))

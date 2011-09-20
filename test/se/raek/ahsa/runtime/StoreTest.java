@@ -11,8 +11,8 @@ public class StoreTest {
 	
 	private static final ValueLocation valX = new ValueLocation("x");
 	private static final VariableLocation varY = new VariableLocation("y");
-	private static final Value v1 = Value.Number.make(1.0);
-	private static final Value v2 = Value.Number.make(1.0);
+	private static final Value v1 = Value.makeNumber(1.0);
+	private static final Value v2 = Value.makeNumber(1.0);
 
 	@Test
 	public void lookupExistingValue() {

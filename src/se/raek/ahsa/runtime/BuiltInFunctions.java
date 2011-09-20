@@ -11,7 +11,7 @@ public class BuiltInFunctions {
 		@Override
 		protected Value invoke(Value v0) {
 			System.out.println(Printer.toString(v0));
-			return Value.Null.make();
+			return Value.makeNull();
 		}
 	};
 

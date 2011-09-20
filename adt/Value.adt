@@ -1,0 +1,7 @@
+(package se.raek.ahsa.runtime)
+
+(defadt Value
+  (Null)
+  (Boolean (boolean b))
+  (Number (double n))
+  (Function (se.raek.ahsa.runtime.Function fn)))

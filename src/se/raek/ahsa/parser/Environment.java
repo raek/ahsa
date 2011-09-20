@@ -30,7 +30,7 @@ public class Environment {
 				@Override
 				public Void caseVariable(VariableLocation var) {
 					if (type == Type.FUNCTION) {
-						bindings.put(label, Identifier.InaccessibleVariable.make(var));
+						bindings.put(label, Identifier.makeInaccessibleVariable(var));
 					} else { // if (type == Type.BLOCK) {
 						bindings.put(label, id);
 					}
@@ -53,20 +53,20 @@ public class Environment {
 	public Identifier resolve(String id) {
 		Identifier result = bindings.get(id);
 		if (result == null) {
-			result = Identifier.Unbound.make();
+			result = Identifier.makeUnbound();
 		}
 		return result;
 	}
 	
 	public ValueLocation installValue(String id) {
 		ValueLocation val = new ValueLocation(id);
-		bindings.put(id, Identifier.Value.make(val));
+		bindings.put(id, Identifier.makeValue(val));
 		return val;
 	}
 	
 	public VariableLocation installVariable(String id) {
 		VariableLocation var = new VariableLocation(id);
-		bindings.put(id, Identifier.Variable.make(var));
+		bindings.put(id, Identifier.makeVariable(var));
 		return var;
 	}
 	

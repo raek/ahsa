@@ -36,7 +36,7 @@ public class CompoundFunction implements Function {
 		return action.matchControlAction(new Matcher<Value>() {
 			@Override
 			public Value caseNext() {
-				return Value.Null.make();
+				return Value.makeNull();
 			}
 			@Override
 			public Value caseReturn(Value v) {

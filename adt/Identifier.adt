@@ -1,0 +1,10 @@
+(package se.raek.ahsa.parser)
+
+(import se.raek.ahsa.ast.ValueLocation)
+(import se.raek.ahsa.ast.VariableLocation)
+
+(defadt Identifier
+  (Unbound)
+  (Value (ValueLocation val))
+  (Variable (VariableLocation var))
+  (InaccessibleVariable (VariableLocation var)))

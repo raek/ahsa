@@ -1,73 +1,98 @@
 package se.raek.ahsa.runtime;
 
-import se.raek.ahsa.runtime.Value.Function;
+import se.raek.ahsa.runtime.Value;
 
-public interface ControlAction {
-	
-	<T> T matchControlAction(Matcher<T> m);
-	
+public abstract class ControlAction {
+
+	private ControlAction() {
+	}
+
+	public abstract <T> T matchControlAction(Matcher<T> m);
+
 	public interface Matcher<T> {
 		T caseNext();
 		T caseReturn(Value v);
 	}
-	
-	public static final class Next implements ControlAction {
-		
-		private static final Next instance = new Next();
-		
-		private Next() {
+
+	public static abstract class AbstractMatcher<T> implements Matcher<T> {
+
+		public abstract T otherwise();
+
+		@Override
+		public T caseNext() {
+			return otherwise();
 		}
-		
-		public static Next make() {
-			return instance;
+
+		@Override
+		public T caseReturn(Value v) {
+			return otherwise();
 		}
-		
+
+	}
+
+	private static final Next singletonNext = new Next();
+
+	public static ControlAction makeNext() {
+		return singletonNext;
+	}
+
+	public static ControlAction makeReturn(Value v) {
+		return new Return(v);
+	}
+
+	private static final class Next extends ControlAction {
+
+		public Next() {
+		}
+
+		@Override
 		public <T> T matchControlAction(Matcher<T> m) {
 			return m.caseNext();
 		}
-		
+
+		// Using identity-based .equals for the interning Next class
+
+		// Using identity-based .hashCode for the interning Next class
+
 		@Override
 		public String toString() {
 			return "Next()";
 		}
-		
+
 	}
-	
-	public static final class Return implements ControlAction {
-		
+
+	private static final class Return extends ControlAction {
+
 		private final Value v;
-		
-		private Return(Value v) {
-			if (v == null) throw new NullPointerException(); 
+
+		public Return(Value v) {
+			if (v == null) throw new NullPointerException();
 			this.v = v;
 		}
-		
-		public static Return make(Value v) {
-			return new Return(v);
-		}
-		
+
+		@Override
 		public <T> T matchControlAction(Matcher<T> m) {
 			return m.caseReturn(v);
 		}
-		
+
 		@Override
 		public boolean equals(Object otherObject) {
 			if (this == otherObject) return true;
-			if (!(otherObject instanceof Function)) return false;
-			Return otherReturn = (Return) otherObject;
-			return v.equals(otherReturn.v);
+			if (!(otherObject instanceof Return)) return false;
+			Return other = (Return) otherObject;
+			return (v.equals(other.v));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return v.hashCode();
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Return(" + v + ")";
 		}
-		
+
 	}
 
 }

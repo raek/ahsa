@@ -18,6 +18,14 @@ import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.runtime.Value;
+
+import static se.raek.ahsa.ast.Expression.*;
+import static se.raek.ahsa.ast.ArithmeticOperator.*;
+import static se.raek.ahsa.ast.EqualityOperator.*;
+import static se.raek.ahsa.ast.RelationalOperator.*;
+import static se.raek.ahsa.ast.Statement.*;
+import static se.raek.ahsa.runtime.Value.*;
+
 }
 
 @lexer::header {
@@ -45,7 +53,7 @@ statements returns [List<Statement> stmts]
 
 statement returns [List<Statement> stmts]
   @init{ $stmts = new ArrayList<Statement>(); }
-	: e=expression ';' { $stmts.add(Statement.ThrowawayExpression.make($e.expr)); }
+	: e=expression ';' { $stmts.add(makeThrowawayExpression($e.expr)); }
 	| { Expression cond; List<Statement> thenStmts, elseStmts = null; }
 	  'if'
 	  c=expression       { cond = $c.expr; }
@@ -59,11 +67,11 @@ statement returns [List<Statement> stmts]
 	  { if (elseStmts == null) {
 	        elseStmts = Collections.emptyList();
 	    } 
-	    $stmts.add(Statement.Conditional.make(cond, thenStmts, elseStmts));
+	    $stmts.add(makeConditional(cond, thenStmts, elseStmts));
 	  }
 	| 'val' ID '=' expression ';' {
 	    ValueLocation val = envStack.getCurrent().installValue($ID.text);
-	    $stmts.add(Statement.ValueDefinition.make(val, $expression.expr));
+	    $stmts.add(makeValueDefinition(val, $expression.expr));
 	  }
 	| { Expression expr = null; }
 	  'var' ID
@@ -74,7 +82,7 @@ statement returns [List<Statement> stmts]
 	  {
 	    VariableLocation var = envStack.getCurrent().installVariable($ID.text);
 	    if (expr != null) {
-	      $stmts.add(Statement.VariableAssignment.make(var, $expression.expr));
+	      $stmts.add(makeVariableAssignment(var, $expression.expr));
 	    }
 	  }
   | ID '=' expression ';'
@@ -99,12 +107,12 @@ statement returns [List<Statement> stmts]
           throw new RuntimeException("Variable inaccessible from here: " + var.label);
         }
       });
-      $stmts.add(Statement.VariableAssignment.make(var, $expression.expr));
+      $stmts.add(makeVariableAssignment(var, $expression.expr));
     }
   | '{'        { envStack.enterScope(Environment.Type.BLOCK); }
     statements { $stmts = $statements.stmts; }
     '}'        { envStack.exitScope(); }
-  | 'return' expression ';' { $stmts.add(Statement.Return.make($expression.expr)); }
+  | 'return' expression ';' { $stmts.add(makeReturn($expression.expr)); }
 	;
 
 expressions returns [List<Expression> exprs]
@@ -116,45 +124,45 @@ expressions returns [List<Expression> exprs]
 
 expression returns [Expression expr]
   : e1=expr1           { $expr = $e1.expr; }
-    (op=eq_op e2=expr1 { $expr = Expression.EqualityOperation.make($op.op, $expr, $e2.expr); } 
+    (op=eq_op e2=expr1 { $expr = makeEqualityOperation($op.op, $expr, $e2.expr); } 
     )*
   ;
 
 expr1 returns [Expression expr]
   : e1=expr2            { $expr = $e1.expr; }
-    (op=rel_op e2=expr2 { $expr = Expression.RelationalOperation.make($op.op, $expr, $e2.expr); } 
+    (op=rel_op e2=expr2 { $expr = makeRelationalOperation($op.op, $expr, $e2.expr); } 
     )*
   ;
 
 expr2 returns [Expression expr]
 	: e1=expr3            { $expr = $e1.expr; }
-		(op=add_op e2=expr3 { $expr = Expression.ArithmeticOperation.make($op.op, $expr, $e2.expr); } 
+		(op=add_op e2=expr3 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
 		)*
 	;
 
 expr3 returns [Expression expr]
 	: e1=expr4				  	{ $expr = $e1.expr; }
-		(op=mul_op e2=expr4 { $expr = Expression.ArithmeticOperation.make($op.op, $expr, $e2.expr); } 
+		(op=mul_op e2=expr4 { $expr = makeArithmeticOperation($op.op, $expr, $e2.expr); } 
 		)*
 	;
 
 expr4 returns [Expression expr]
   : e=expr5                 { $expr = $e.expr; }
-    ('(' es=expressions ')' { $expr = Expression.FunctionApplication.make($expr, $es.exprs); }
+    ('(' es=expressions ')' { $expr = makeFunctionApplication($expr, $es.exprs); }
     )*
   ;
 
 expr5 returns [Expression expr]
-	: c=constant		       { $expr = Expression.Constant.make($c.v); }
+	: c=constant		       { $expr = makeConstant($c.v); }
 	| l=lookup             { $expr = $l.expr; }
 	| fn=lambda            { $expr = $fn.expr; }
 	| '(' e=expression ')' { $expr = $e.expr; }
 	;
 
 constant returns [Value v]
-	: null_literal      { $v = Value.Null.make(); }
-	| b=boolean_literal { $v = Value.Boolean.make($b.b); }
-	| n=number_literal  { $v = Value.Number.make($n.n); }
+	: null_literal      { $v = makeNull(); }
+	| b=boolean_literal { $v = makeBoolean($b.b); }
+	| n=number_literal  { $v = makeNumber($n.n); }
 	;
 
 lookup returns [Expression expr]
@@ -168,11 +176,11 @@ lookup returns [Expression expr]
         }
         @Override
         public Expression caseValue(ValueLocation val) {
-          return Expression.ValueLookup.make(val);
+          return makeValueLookup(val);
         }
         @Override
         public Expression caseVariable(VariableLocation var) {
-          return Expression.VariableLookup.make(var);
+          return makeVariableLookup(var);
         }
         @Override
         public Expression caseInaccessibleVariable(VariableLocation var) {
@@ -188,7 +196,7 @@ lambda returns [Expression expr]
     ps=parameters
     ')'
     '{'
-    stmts=statements { $expr = Expression.FunctionAbstraction.make($ps.vals, $stmts.stmts); }
+    stmts=statements { $expr = makeFunctionAbstraction($ps.vals, $stmts.stmts); }
     '}'              { envStack.exitScope(); }
   ;
 
@@ -205,25 +213,25 @@ parameter returns [ValueLocation val]
   ;
 
 eq_op returns [EqualityOperator op]
-  : '==' { $op = EqualityOperator.EQUAL; }
-  | '!=' { $op = EqualityOperator.UNEQUAL; }
+  : '==' { $op = EQUAL; }
+  | '!=' { $op = UNEQUAL; }
   ;
 
 rel_op returns [RelationalOperator op]
-  : '>'  { $op = RelationalOperator.GREATER; }
-  | '<'  { $op = RelationalOperator.LESS; }
-  | '>=' { $op = RelationalOperator.GREATER_EQUAL; }
-  | '<=' { $op = RelationalOperator.LESS_EQUAL; }
+  : '>'  { $op = GREATER; }
+  | '<'  { $op = LESS; }
+  | '>=' { $op = GREATER_EQUAL; }
+  | '<=' { $op = LESS_EQUAL; }
   ;
 
 add_op returns [ArithmeticOperator op]
-	: '+' { $op = ArithmeticOperator.ADDITION; }
-	| '-' { $op = ArithmeticOperator.SUBTRACTION; }
+	: '+' { $op = ADDITION; }
+	| '-' { $op = SUBTRACTION; }
 	;
 
 mul_op returns [ArithmeticOperator op]
-	: '*' { $op = ArithmeticOperator.MULTIPLICATION; }
-	| '/' { $op = ArithmeticOperator.DIVISION; }
+	: '*' { $op = MULTIPLICATION; }
+	| '/' { $op = DIVISION; }
 	;
 
 null_literal: 'null' ;
