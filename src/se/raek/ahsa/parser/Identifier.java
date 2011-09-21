@@ -2,6 +2,7 @@ package se.raek.ahsa.parser;
 
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.ast.LoopLabel;
 
 public abstract class Identifier {
 
@@ -15,6 +16,8 @@ public abstract class Identifier {
 		T caseValue(ValueLocation val);
 		T caseVariable(VariableLocation var);
 		T caseInaccessibleVariable(VariableLocation var);
+		T caseLoop(LoopLabel loop);
+		T caseInaccessibleLoop(LoopLabel loop);
 	}
 
 	public static abstract class AbstractMatcher<T> implements Matcher<T> {
@@ -37,6 +40,14 @@ public abstract class Identifier {
 			return otherwise();
 		}
 
+		public T caseLoop(LoopLabel loop) {
+			return otherwise();
+		}
+
+		public T caseInaccessibleLoop(LoopLabel loop) {
+			return otherwise();
+		}
+
 	}
 
 	private static final Unbound singletonUnbound = new Unbound();
@@ -55,6 +66,14 @@ public abstract class Identifier {
 
 	public static Identifier makeInaccessibleVariable(VariableLocation var) {
 		return new InaccessibleVariable(var);
+	}
+
+	public static Identifier makeLoop(LoopLabel loop) {
+		return new Loop(loop);
+	}
+
+	public static Identifier makeInaccessibleLoop(LoopLabel loop) {
+		return new InaccessibleLoop(loop);
 	}
 
 	private static final class Unbound extends Identifier {
@@ -176,6 +195,74 @@ public abstract class Identifier {
 		@Override
 		public String toString() {
 			return "InaccessibleVariable(" + var + ")";
+		}
+
+	}
+
+	private static final class Loop extends Identifier {
+
+		private final LoopLabel loop;
+
+		public Loop(LoopLabel loop) {
+			if (loop == null) throw new NullPointerException();
+			this.loop = loop;
+		}
+
+		@Override
+		public <T> T matchIdentifier(Matcher<T> m) {
+			return m.caseLoop(loop);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Loop)) return false;
+			Loop other = (Loop) otherObject;
+			return (loop.equals(other.loop));
+		}
+
+		@Override
+		public int hashCode() {
+			return loop.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Loop(" + loop + ")";
+		}
+
+	}
+
+	private static final class InaccessibleLoop extends Identifier {
+
+		private final LoopLabel loop;
+
+		public InaccessibleLoop(LoopLabel loop) {
+			if (loop == null) throw new NullPointerException();
+			this.loop = loop;
+		}
+
+		@Override
+		public <T> T matchIdentifier(Matcher<T> m) {
+			return m.caseInaccessibleLoop(loop);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof InaccessibleLoop)) return false;
+			InaccessibleLoop other = (InaccessibleLoop) otherObject;
+			return (loop.equals(other.loop));
+		}
+
+		@Override
+		public int hashCode() {
+			return loop.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "InaccessibleLoop(" + loop + ")";
 		}
 
 	}

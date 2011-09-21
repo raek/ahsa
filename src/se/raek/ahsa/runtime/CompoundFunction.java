@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import se.raek.ahsa.Interpreter;
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.runtime.ControlAction.Matcher;
@@ -35,6 +36,9 @@ public class CompoundFunction implements Function {
 		return action.matchControlAction(new Matcher<Value>() {
 			public Value caseNext() {
 				return Value.makeNull();
+			}
+			public Value caseBreak(LoopLabel loop) {
+				throw new AssertionError("Tried to break from loop, reached function top level. Loop label: " + loop);
 			}
 			public Value caseReturn(Value v) {
 				return v;

@@ -2,9 +2,12 @@
 
 (import se.raek.ahsa.ast.ValueLocation)
 (import se.raek.ahsa.ast.VariableLocation)
+(import se.raek.ahsa.ast.LoopLabel)
 
 (defadt Identifier
   (Unbound)
   (Value (ValueLocation val))
   (Variable (VariableLocation var))
-  (InaccessibleVariable (VariableLocation var)))
+  (InaccessibleVariable (VariableLocation var))
+  (Loop (LoopLabel loop))
+  (InaccessibleLoop (LoopLabel loop)))

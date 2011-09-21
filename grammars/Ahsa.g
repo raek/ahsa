@@ -14,6 +14,7 @@ import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.ArithmeticOperator;
@@ -58,6 +59,8 @@ statement returns [List<Statement> stmts]
   | s=val                  { $stmts.add($s.stmt); }
   | s=var                  { if ($s.stmt != null) { $stmts.add($s.stmt); } }
   | s=assignment           { $stmts.add($s.stmt); }
+  | s=loop                 { $stmts.add($s.stmt); }
+  | s=break_statement      { $stmts.add($s.stmt); }
   | s=return_statement     { $stmts.add($s.stmt); }
   | ss=block               { $stmts.addAll($ss.stmts); }
   ;
@@ -122,10 +125,64 @@ assignment returns [Statement stmt]
           return var;
         }
         public VariableLocation caseInaccessibleVariable(VariableLocation var) {
-          throw new RuntimeException("Variable inaccessible from here: " + var.label);
+          throw new RuntimeException("Variable inaccessible from here: " + label);
+        }
+        public VariableLocation caseLoop(LoopLabel loop) {
+          throw new RuntimeException("Expected variable, got loop label: " + label); 
+        }
+        public VariableLocation caseInaccessibleLoop(LoopLabel loop) {
+          throw new RuntimeException("Expected variable, got loop label: " + label); 
         }
       });
       $stmt = makeVariableAssignment(var, $expression.expr);
+    }
+  ;
+
+loop returns [Statement stmt]
+  : 'loop' ID?
+    {
+      String label = ($ID == null) ? LoopLabel.NO_LABEL : $ID.text;
+      envStack.enterScope(Environment.Type.BLOCK);
+      LoopLabel loop = envStack.getCurrent().installLoop(label);
+    }
+    '{'
+    statements
+    '}'
+    {
+      $stmt = makeLoop(loop, $statements.stmts);
+      envStack.exitScope();
+    }
+  ;
+
+break_statement returns [Statement stmt]
+  : 'break' ID? ';'
+    {
+      final String label = ($ID == null) ? LoopLabel.NO_LABEL : $ID.text;
+      Identifier id = envStack.getCurrent().resolve(label);
+      $stmt = makeBreak(id.matchIdentifier(new Identifier.Matcher<LoopLabel>() {
+        public LoopLabel caseUnbound() {
+          if (label.equals(LoopLabel.NO_LABEL)) {
+            throw new RuntimeException("Break outside a loop");
+          } else {
+            throw new RuntimeException("Unbound loop label: " + label);
+          }
+        }
+        public LoopLabel caseValue(ValueLocation val) {
+          throw new RuntimeException("Expected loop label, got named value: " + label); 
+        }
+        public LoopLabel caseVariable(VariableLocation var) {
+          throw new RuntimeException("Expected loop label, got variable: " + label); 
+        }
+        public LoopLabel caseInaccessibleVariable(VariableLocation var) {
+          throw new RuntimeException("Expected loop label, got variable: " + label); 
+        }
+        public LoopLabel caseLoop(LoopLabel loop) {
+          return loop; 
+        }
+        public LoopLabel caseInaccessibleLoop(LoopLabel loop) {
+          throw new RuntimeException("Loop label inaccessible from here: " + label); 
+        }
+      }));
     }
   ;
 
@@ -203,7 +260,13 @@ lookup returns [Expression expr]
           return makeVariableLookup(var);
         }
         public Expression caseInaccessibleVariable(VariableLocation var) {
-          throw new RuntimeException("Variable inaccessible from here: " + var.label);
+          throw new RuntimeException("Variable inaccessible from here: " + label);
+        }
+        public Expression caseLoop(LoopLabel loop) {
+          throw new RuntimeException("Expected named value or variable, got loop label: " + label); 
+        }
+        public Expression caseInaccessibleLoop(LoopLabel loop) {
+          throw new RuntimeException("Expected named value or variable, got loop label: " + label); 
         }
       });
     }

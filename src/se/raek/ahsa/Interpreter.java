@@ -6,6 +6,7 @@ import java.util.List;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.ArithmeticOperator;
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
@@ -35,6 +36,22 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 	public static ControlAction execute(List<Statement> stmts, Store sto) {
 		Interpreter interp = new Interpreter(sto);
 		return interp.executeStatements(stmts);
+	}
+	
+	public static void executeTopLevel(List<Statement> stmts, Store sto) {
+		Interpreter interp = new Interpreter(sto);
+		ControlAction action = interp.executeStatements(stmts);
+		action.matchControlAction(new ControlAction.Matcher<Void>() {
+			public Void caseNext() {
+				return null;
+			}
+			public Void caseBreak(LoopLabel loop) {
+				throw new AssertionError("Tried to break from loop, reached program top level. Loop label: " + loop);
+			}
+			public Void caseReturn(Value v) {
+				throw new AssertionError("Tried to return from function, reached program top level. Return value: " + v);
+			}
+		});
 	}
 	
 	public static class CastException extends RuntimeException {
@@ -105,8 +122,24 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			public Boolean caseNext() {
 				return false;
 			}
+			public Boolean caseBreak(LoopLabel loop) {
+				return true;
+			}
 			public Boolean caseReturn(Value v) {
 				return true;
+			}
+		});
+	}
+	
+	private LoopLabel getLoopLabel(ControlAction action) {
+		return action.matchControlAction(new ControlAction.AbstractMatcher<LoopLabel>() {
+			@Override
+			public LoopLabel caseBreak(LoopLabel loop) {
+				return loop;
+			}
+			@Override
+			public LoopLabel otherwise() {
+				return null;
 			}
 		});
 	}
@@ -229,6 +262,22 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		} else {
 			return executeStatements(elseStmts);
 		}
+	}
+
+	public ControlAction caseLoop(LoopLabel thisLoop, List<Statement> body) {
+		while (true) {
+			ControlAction action = executeStatements(body);
+			LoopLabel thatLoop = getLoopLabel(action);
+			if (thatLoop != null && thatLoop.equals(thisLoop)) {
+				return ControlAction.makeNext();
+			} else if (shouldExit(action)) {
+				return action;
+			}
+		}
+	}
+
+	public ControlAction caseBreak(LoopLabel loop) {
+		return ControlAction.makeBreak(loop);
 	}
 
 	public ControlAction caseReturn(Expression expr) {

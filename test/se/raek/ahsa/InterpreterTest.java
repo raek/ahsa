@@ -10,13 +10,16 @@ import org.junit.Test;
 
 import se.raek.ahsa.Interpreter.CastException;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.runtime.BuiltInFunctions;
+import se.raek.ahsa.runtime.CompoundFunction;
 import se.raek.ahsa.runtime.ControlAction;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
+import se.raek.ahsa.runtime.Function;
 
 import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
@@ -27,9 +30,11 @@ import static se.raek.ahsa.runtime.Value.*;
 
 public class InterpreterTest {
 
+	private final static Value v0 = makeNumber(0.0);
 	private final static Value v1 = makeNumber(1.0);
 	private final static Value v2 = makeNumber(2.0);
 	private final static Value v3 = makeNumber(3.0);
+	private final static Expression c0 = makeConstant(v0);
 	private final static Expression c1 = makeConstant(v1);
 	private final static Expression c2 = makeConstant(v2);
 	private final static Expression c3 = makeConstant(v3);
@@ -236,18 +241,113 @@ public class InterpreterTest {
 	}
 	
 	@Test
+	public void executeBreak() {
+		final LoopLabel loop1 = new LoopLabel("l1");
+		final LoopLabel loop2 = new LoopLabel("l2");
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(makeBreak(loop1));
+		stmts.add(makeBreak(loop2));;
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.AbstractMatcher<java.lang.Boolean>() {
+			@Override
+			public java.lang.Boolean caseBreak(LoopLabel loop) {
+				return loop.equals(loop1);
+			}
+			@Override
+			public Boolean otherwise() {
+				return false;
+			}
+		}));
+	}
+	
+	@Test
+	public void breakThisLoop() {
+		final LoopLabel loop0 = new LoopLabel("l");
+		List<Statement> body = Collections.singletonList(makeBreak(loop0));
+		List<Statement> stmts = Collections.singletonList(makeLoop(loop0, body));
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.AbstractMatcher<java.lang.Boolean>() {
+			@Override
+			public java.lang.Boolean caseNext() {
+				return true;
+			}
+			@Override
+			public Boolean otherwise() {
+				return false;
+			}
+		}));
+	}
+	
+	@Test
+	public void breakOtherLoop() {
+		final LoopLabel loop1 = new LoopLabel("l1");
+		final LoopLabel loop2 = new LoopLabel("l2");
+		List<Statement> body = Collections.singletonList(makeBreak(loop1));
+		List<Statement> stmts = Collections.singletonList(makeLoop(loop2, body));
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.AbstractMatcher<java.lang.Boolean>() {
+			@Override
+			public java.lang.Boolean caseBreak(LoopLabel loop) {
+				return loop.equals(loop1);
+			}
+			@Override
+			public Boolean otherwise() {
+				return false;
+			}
+		}));
+	}
+	
+	@Test
+	public void returnFromLoop() {
+		final LoopLabel loop0 = new LoopLabel("l");
+		List<Statement> body = Collections.singletonList(makeReturn(c0));
+		List<Statement> stmts = Collections.singletonList(makeLoop(loop0, body));
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.AbstractMatcher<java.lang.Boolean>() {
+			@Override
+			public java.lang.Boolean caseReturn(Value v) {
+				return v.equals(v0);
+			}
+			@Override
+			public Boolean otherwise() {
+				return false;
+			}
+		}));
+	}
+	
+	@Test
 	public void executeReturn() {
 		List<Statement> stmts = new ArrayList<Statement>();
 		stmts.add(makeReturn(c1));
 		stmts.add(makeReturn(c2));;
-		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.Matcher<java.lang.Boolean>() {
-			public java.lang.Boolean caseNext() {
-				return false;
-			}
+		assertTrue(Interpreter.execute(stmts, new Store()).matchControlAction(new ControlAction.AbstractMatcher<java.lang.Boolean>() {
+			@Override
 			public java.lang.Boolean caseReturn(Value v) {
 				return v.equals(v1);
 			}
+			@Override
+			public Boolean otherwise() {
+				return false;
+			}
 		}));
+	}
+	
+	@Test
+	public void returnFromFunction() {
+		List<Statement> body = Collections.singletonList(makeReturn(c0));
+		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		assertEquals(v0, fn.apply(Collections.<Value>emptyList()));
+	}
+	
+	@Test
+	public void reachEndOfFunction() {
+		List<Statement> body = Collections.emptyList();
+		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		assertEquals(makeNull(), fn.apply(Collections.<Value>emptyList()));
+	}
+	
+	@Test(expected=AssertionError.class)
+	public void breakFromFunction() {
+		final LoopLabel loop0 = new LoopLabel("l");
+		List<Statement> body = Collections.singletonList(makeBreak(loop0));
+		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		fn.apply(Collections.<Value>emptyList());
 	}
 	
 	@Test
@@ -274,6 +374,53 @@ public class InterpreterTest {
 		List<Statement> stmts = new ArrayList<Statement>();
 		stmts.add(makeThrowawayExpression(makeFunctionApplication(function, params)));
 		Interpreter.execute(stmts, new Store());
+	}
+	
+	@Test
+	public void executeTopLevelNormal() {
+		List<Statement> stmts = Collections.singletonList(makeThrowawayExpression(cNull));
+		Interpreter.executeTopLevel(stmts, new Store());
+	}
+	
+	@Test(expected=AssertionError.class)
+	public void executeTopLevelBreak() {
+		LoopLabel loop = new LoopLabel("l");
+		List<Statement> stmts = Collections.singletonList(makeBreak(loop));
+		Interpreter.executeTopLevel(stmts, new Store());
+	}
+	
+	@Test(expected=AssertionError.class)
+	public void executeTopLevelReturn() {
+		List<Statement> stmts = Collections.singletonList(makeReturn(cNull));
+		Interpreter.executeTopLevel(stmts, new Store());
+	}
+	
+	@Test
+	public void loop() {
+		// var a = 3;
+		// var b = 0;
+		// loop l {
+		//   if a == 0 {
+		//     break l;
+		//   }
+		//   a = a - 1;
+		//   b = b + 1;
+		// }
+		VariableLocation varA = new VariableLocation("a");
+		VariableLocation varB = new VariableLocation("b");
+		LoopLabel loop = new LoopLabel("l");
+		List<Statement> stmts = new ArrayList<Statement>();
+		stmts.add(makeVariableAssignment(varA, c3));
+		stmts.add(makeVariableAssignment(varB, c0));
+		List<Statement> body = new ArrayList<Statement>();
+		body.add(makeConditional(makeEqualityOperation(EQUAL, makeVariableLookup(varA), c0), Collections.singletonList(makeBreak(loop)), Collections.<Statement>emptyList()));
+		body.add(makeVariableAssignment(varA, makeArithmeticOperation(SUBTRACTION, makeVariableLookup(varA), c1)));
+		body.add(makeVariableAssignment(varB, makeArithmeticOperation(ADDITION, makeVariableLookup(varB), c1)));
+		stmts.add(makeLoop(loop, body));
+		Store sto = new Store();
+		Interpreter.executeTopLevel(stmts, sto);
+		assertEquals(v0, sto.lookupVariable(varA));
+		assertEquals(v3, sto.lookupVariable(varB));
 	}
 
 	@Test

@@ -7,6 +7,7 @@ import java.util.List;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.ArithmeticOperator;
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
@@ -219,6 +220,16 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 			stmt.matchStatement(this);
 		}
 		writer.print("}");
+		return null;
+	}
+
+	public Void caseLoop(LoopLabel label, List<Statement> body) {
+		writer.print("#<loop>");
+		return null;
+	}
+
+	public Void caseBreak(LoopLabel label) {
+		writer.print("#<break>");
 		return null;
 	}
 

@@ -1,7 +1,9 @@
 (package se.raek.ahsa.runtime)
 
+(import se.raek.ahsa.ast.LoopLabel)
 (import se.raek.ahsa.runtime.Value)
 
 (defadt ControlAction
   (Next)
+  (Break (LoopLabel loop))
   (Return (Value v)))

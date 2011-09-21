@@ -3,6 +3,7 @@ package se.raek.ahsa.parser;
 import java.util.HashMap;
 import java.util.Map;
 
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
 
@@ -31,6 +32,15 @@ public class Environment {
 				public Void caseVariable(VariableLocation var) {
 					if (type == Type.FUNCTION) {
 						bindings.put(label, Identifier.makeInaccessibleVariable(var));
+					} else { // if (type == Type.BLOCK) {
+						bindings.put(label, id);
+					}
+					return null;
+				}
+				@Override
+				public Void caseLoop(LoopLabel loop) {
+					if (type == Type.FUNCTION) {
+						bindings.put(label, Identifier.makeInaccessibleLoop(loop));
 					} else { // if (type == Type.BLOCK) {
 						bindings.put(label, id);
 					}
@@ -68,6 +78,14 @@ public class Environment {
 		VariableLocation var = new VariableLocation(id);
 		bindings.put(id, Identifier.makeVariable(var));
 		return var;
+	}
+	
+	public LoopLabel installLoop(String id) {
+		LoopLabel loop = new LoopLabel(id);
+		Identifier identifier = Identifier.makeLoop(loop);
+		bindings.put(id, identifier);
+		bindings.put(LoopLabel.NO_LABEL, identifier);
+		return loop;
 	}
 	
 }

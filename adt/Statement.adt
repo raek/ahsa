@@ -10,4 +10,6 @@
   (ValueDefinition (ValueLocation val) (Expression expr))
   (VariableAssignment (VariableLocation var) (Expression expr))
   (Conditional (Expression cond) ((List Statement) thenStmts) ((List Statement) elseStmts))
+  (Loop (LoopLabel loop) ((List Statement) body))
+  (Break (LoopLabel loop))
   (Return (Expression expr)))

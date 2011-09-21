@@ -1,5 +1,6 @@
 package se.raek.ahsa.runtime;
 
+import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.runtime.Value;
 
 public abstract class ControlAction {
@@ -11,6 +12,7 @@ public abstract class ControlAction {
 
 	public interface Matcher<T> {
 		T caseNext();
+		T caseBreak(LoopLabel loop);
 		T caseReturn(Value v);
 	}
 
@@ -19,6 +21,10 @@ public abstract class ControlAction {
 		public abstract T otherwise();
 
 		public T caseNext() {
+			return otherwise();
+		}
+
+		public T caseBreak(LoopLabel loop) {
 			return otherwise();
 		}
 
@@ -32,6 +38,10 @@ public abstract class ControlAction {
 
 	public static ControlAction makeNext() {
 		return singletonNext;
+	}
+
+	public static ControlAction makeBreak(LoopLabel loop) {
+		return new Break(loop);
 	}
 
 	public static ControlAction makeReturn(Value v) {
@@ -55,6 +65,40 @@ public abstract class ControlAction {
 		@Override
 		public String toString() {
 			return "Next()";
+		}
+
+	}
+
+	private static final class Break extends ControlAction {
+
+		private final LoopLabel loop;
+
+		public Break(LoopLabel loop) {
+			if (loop == null) throw new NullPointerException();
+			this.loop = loop;
+		}
+
+		@Override
+		public <T> T matchControlAction(Matcher<T> m) {
+			return m.caseBreak(loop);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Break)) return false;
+			Break other = (Break) otherObject;
+			return (loop.equals(other.loop));
+		}
+
+		@Override
+		public int hashCode() {
+			return loop.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Break(" + loop + ")";
 		}
 
 	}

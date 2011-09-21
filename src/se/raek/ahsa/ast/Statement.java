@@ -17,6 +17,8 @@ public abstract class Statement {
 		T caseValueDefinition(ValueLocation val, Expression expr);
 		T caseVariableAssignment(VariableLocation var, Expression expr);
 		T caseConditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts);
+		T caseLoop(LoopLabel loop, List<Statement> body);
+		T caseBreak(LoopLabel loop);
 		T caseReturn(Expression expr);
 	}
 
@@ -40,6 +42,14 @@ public abstract class Statement {
 			return otherwise();
 		}
 
+		public T caseLoop(LoopLabel loop, List<Statement> body) {
+			return otherwise();
+		}
+
+		public T caseBreak(LoopLabel loop) {
+			return otherwise();
+		}
+
 		public T caseReturn(Expression expr) {
 			return otherwise();
 		}
@@ -60,6 +70,14 @@ public abstract class Statement {
 
 	public static Statement makeConditional(Expression cond, List<Statement> thenStmts, List<Statement> elseStmts) {
 		return new Conditional(cond, thenStmts, elseStmts);
+	}
+
+	public static Statement makeLoop(LoopLabel loop, List<Statement> body) {
+		return new Loop(loop, body);
+	}
+
+	public static Statement makeBreak(LoopLabel loop) {
+		return new Break(loop);
 	}
 
 	public static Statement makeReturn(Expression expr) {
@@ -216,6 +234,79 @@ public abstract class Statement {
 		@Override
 		public String toString() {
 			return "Conditional(" + cond + ", " + thenStmts + ", " + elseStmts + ")";
+		}
+
+	}
+
+	private static final class Loop extends Statement {
+
+		private final LoopLabel loop;
+		private final List<Statement> body;
+
+		public Loop(LoopLabel loop, List<Statement> body) {
+			if (loop == null || body == null) throw new NullPointerException();
+			this.loop = loop;
+			this.body = body;
+		}
+
+		@Override
+		public <T> T matchStatement(Matcher<T> m) {
+			return m.caseLoop(loop, body);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Loop)) return false;
+			Loop other = (Loop) otherObject;
+			return (loop.equals(other.loop)) && (body.equals(other.body));
+		}
+
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + loop.hashCode();
+			result = 31 * result + body.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "Loop(" + loop + ", " + body + ")";
+		}
+
+	}
+
+	private static final class Break extends Statement {
+
+		private final LoopLabel loop;
+
+		public Break(LoopLabel loop) {
+			if (loop == null) throw new NullPointerException();
+			this.loop = loop;
+		}
+
+		@Override
+		public <T> T matchStatement(Matcher<T> m) {
+			return m.caseBreak(loop);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Break)) return false;
+			Break other = (Break) otherObject;
+			return (loop.equals(other.loop));
+		}
+
+		@Override
+		public int hashCode() {
+			return loop.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Break(" + loop + ")";
 		}
 
 	}

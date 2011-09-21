@@ -36,7 +36,7 @@ public class Main {
 		AhsaParser parser = new AhsaParser(tokens);
 		parser.resetEnvironment(env);
 		List<Statement> stmts = parser.statements();
-		Interpreter.execute(stmts, sto);
+		Interpreter.executeTopLevel(stmts, sto);
 	}
 
 }
