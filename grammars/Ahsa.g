@@ -210,7 +210,7 @@ lookup returns [Expression expr]
   ;
 
 lambda returns [Expression expr]
-  : 'fn'             { envStack.enterScope(Environment.Type.BLOCK); }
+  : 'fn'             { envStack.enterScope(Environment.Type.FUNCTION); }
     '('
     ps=parameters
     ')'
