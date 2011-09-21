@@ -27,7 +27,7 @@ public class CompoundFunction implements Function {
 		Iterator<ValueLocation> formals = formalParameters.iterator();
 		Iterator<Value> actuals = actualParameters.iterator();
 		while(formals.hasNext() && actuals.hasNext()) {
-			sto.defineValue(formals.next(), actuals.next());
+			newStore.defineValue(formals.next(), actuals.next());
 		}
 		if (formals.hasNext() || actuals.hasNext()) {
 			throw new Function.ArityException(formalParameters.size(), actualParameters.size());

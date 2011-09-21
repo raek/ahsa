@@ -351,6 +351,32 @@ public class InterpreterTest {
 	}
 	
 	@Test
+	public void localsInNewStore() {
+		ValueLocation f = new ValueLocation("f");
+		ValueLocation x = new ValueLocation("x");
+		List<Statement> stmts = new ArrayList<Statement>();
+		List<Statement> bodyStmts = Collections.singletonList((Statement) makeValueDefinition(x, c0));
+		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(Collections.<ValueLocation>emptyList(), bodyStmts)));
+		List<Expression> params = Collections.emptyList();
+		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
+		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
+		Interpreter.execute(stmts, new Store());
+	}
+	
+	@Test
+	public void paramsInNewStore() {
+		ValueLocation f = new ValueLocation("f");
+		ValueLocation x = new ValueLocation("x");
+		List<Statement> stmts = new ArrayList<Statement>();
+		List<Statement> bodyStmts = Collections.emptyList();
+		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(Collections.singletonList(x), bodyStmts)));
+		List<Expression> params = Collections.singletonList(c0);
+		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
+		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
+		Interpreter.execute(stmts, new Store());
+	}
+	
+	@Test
 	public void makeAndApplyFunction() {
 		ValueLocation f = new ValueLocation("f");
 		ValueLocation x = new ValueLocation("x");
