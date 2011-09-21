@@ -331,14 +331,14 @@ public class InterpreterTest {
 	@Test
 	public void returnFromFunction() {
 		List<Statement> body = Collections.singletonList(makeReturn(c0));
-		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		Function fn = new CompoundFunction(null, Collections.<ValueLocation>emptyList(), body, new Store());
 		assertEquals(v0, fn.apply(Collections.<Value>emptyList()));
 	}
 	
 	@Test
 	public void reachEndOfFunction() {
 		List<Statement> body = Collections.emptyList();
-		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		Function fn = new CompoundFunction(null, Collections.<ValueLocation>emptyList(), body, new Store());
 		assertEquals(makeNull(), fn.apply(Collections.<Value>emptyList()));
 	}
 	
@@ -346,7 +346,7 @@ public class InterpreterTest {
 	public void breakFromFunction() {
 		final LoopLabel loop0 = new LoopLabel("l");
 		List<Statement> body = Collections.singletonList(makeBreak(loop0));
-		Function fn = new CompoundFunction(Collections.<ValueLocation>emptyList(), body, new Store());
+		Function fn = new CompoundFunction(null, Collections.<ValueLocation>emptyList(), body, new Store());
 		fn.apply(Collections.<Value>emptyList());
 	}
 	
@@ -356,7 +356,7 @@ public class InterpreterTest {
 		ValueLocation x = new ValueLocation("x");
 		List<Statement> stmts = new ArrayList<Statement>();
 		List<Statement> bodyStmts = Collections.singletonList((Statement) makeValueDefinition(x, c0));
-		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(Collections.<ValueLocation>emptyList(), bodyStmts)));
+		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(null, Collections.<ValueLocation>emptyList(), bodyStmts)));
 		List<Expression> params = Collections.emptyList();
 		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
 		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
@@ -369,7 +369,7 @@ public class InterpreterTest {
 		ValueLocation x = new ValueLocation("x");
 		List<Statement> stmts = new ArrayList<Statement>();
 		List<Statement> bodyStmts = Collections.emptyList();
-		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(Collections.singletonList(x), bodyStmts)));
+		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(null, Collections.singletonList(x), bodyStmts)));
 		List<Expression> params = Collections.singletonList(c0);
 		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
 		stmts.add(makeThrowawayExpression(makeFunctionApplication(makeValueLookup(f), params)));
@@ -384,7 +384,7 @@ public class InterpreterTest {
 		List<Statement> stmts = new ArrayList<Statement>();
 		Expression bodyExpr = makeArithmeticOperation(ADDITION, makeValueLookup(x), c1);
 		List<Statement> bodyStmts = Collections.singletonList((Statement) makeReturn(bodyExpr));
-		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(Collections.singletonList(x), bodyStmts)));
+		stmts.add(makeValueDefinition(f, makeFunctionAbstraction(null, Collections.singletonList(x), bodyStmts)));
 		Expression fExpr = makeValueLookup(f);
 		List<Expression> params = Collections.<Expression>singletonList(c2);
 		stmts.add(makeValueDefinition(y, makeFunctionApplication(fExpr, params)));

@@ -233,9 +233,9 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		return fn.apply(evaledParams);
 	}
 
-	public Value caseFunctionAbstraction(List<ValueLocation> parameters,
-			List<Statement> body) {
-		return Value.makeFunction(new CompoundFunction(parameters, body, sto));
+	public Value caseFunctionAbstraction(ValueLocation self,
+			List<ValueLocation> parameters, List<Statement> body) {
+		return Value.makeFunction(new CompoundFunction(self, parameters, body, sto));
 	}
 
 	public ControlAction caseThrowawayExpression(Expression expr) {

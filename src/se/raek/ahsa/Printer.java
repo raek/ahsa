@@ -181,8 +181,8 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	public Void caseFunctionAbstraction(List<ValueLocation> parameters,
-			List<Statement> body) {
+	public Void caseFunctionAbstraction(ValueLocation self,
+			List<ValueLocation> parameters, List<Statement> body) {
 		writer.print("#<function abstraction>");
 		return null;
 	}

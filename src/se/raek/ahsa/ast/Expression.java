@@ -23,7 +23,7 @@ public abstract class Expression {
 		T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right);
 		T caseEqualityOperation(EqualityOperator op, Expression left, Expression right);
 		T caseRelationalOperation(RelationalOperator op, Expression left, Expression right);
-		T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body);
+		T caseFunctionAbstraction(ValueLocation self, List<ValueLocation> parameters, List<Statement> body);
 		T caseFunctionApplication(Expression function, List<Expression> parameters);
 	}
 
@@ -55,7 +55,7 @@ public abstract class Expression {
 			return otherwise();
 		}
 
-		public T caseFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+		public T caseFunctionAbstraction(ValueLocation self, List<ValueLocation> parameters, List<Statement> body) {
 			return otherwise();
 		}
 
@@ -89,8 +89,8 @@ public abstract class Expression {
 		return new RelationalOperation(op, left, right);
 	}
 
-	public static Expression makeFunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
-		return new FunctionAbstraction(parameters, body);
+	public static Expression makeFunctionAbstraction(ValueLocation self, List<ValueLocation> parameters, List<Statement> body) {
+		return new FunctionAbstraction(self, parameters, body);
 	}
 
 	public static Expression makeFunctionApplication(Expression function, List<Expression> parameters) {
@@ -327,18 +327,20 @@ public abstract class Expression {
 
 	private static final class FunctionAbstraction extends Expression {
 
+		private final ValueLocation self;
 		private final List<ValueLocation> parameters;
 		private final List<Statement> body;
 
-		public FunctionAbstraction(List<ValueLocation> parameters, List<Statement> body) {
+		public FunctionAbstraction(ValueLocation self, List<ValueLocation> parameters, List<Statement> body) {
 			if (parameters == null || body == null) throw new NullPointerException();
+			this.self = self;
 			this.parameters = parameters;
 			this.body = body;
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseFunctionAbstraction(parameters, body);
+			return m.caseFunctionAbstraction(self, parameters, body);
 		}
 
 		@Override
@@ -346,12 +348,13 @@ public abstract class Expression {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof FunctionAbstraction)) return false;
 			FunctionAbstraction other = (FunctionAbstraction) otherObject;
-			return (parameters.equals(other.parameters)) && (body.equals(other.body));
+			return (self == null ? other.self == null : self.equals(other.self)) && (parameters.equals(other.parameters)) && (body.equals(other.body));
 		}
 
 		@Override
 		public int hashCode() {
 			int result = 17;
+			result = 31 * result + (self == null ? 0 : self.hashCode());
 			result = 31 * result + parameters.hashCode();
 			result = 31 * result + body.hashCode();
 			return result;
@@ -359,7 +362,7 @@ public abstract class Expression {
 
 		@Override
 		public String toString() {
-			return "FunctionAbstraction(" + parameters + ", " + body + ")";
+			return "FunctionAbstraction(" + self + ", " + parameters + ", " + body + ")";
 		}
 
 	}

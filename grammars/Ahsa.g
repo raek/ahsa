@@ -274,11 +274,12 @@ lookup returns [Expression expr]
 
 lambda returns [Expression expr]
   : 'fn'             { envStack.enterScope(Environment.Type.FUNCTION); }
+    ID?              { ValueLocation self = ($ID == null) ? null : envStack.getCurrent().installValue($ID.text); }
     '('
     ps=parameters
     ')'
     '{'
-    stmts=statements { $expr = makeFunctionAbstraction($ps.vals, $stmts.stmts); }
+    stmts=statements { $expr = makeFunctionAbstraction(self, $ps.vals, $stmts.stmts); }
     '}'              { envStack.exitScope(); }
   ;
 
