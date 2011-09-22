@@ -1,33 +1,32 @@
 package se.raek.ahsa.parser;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Stack;
 
 public class EnvironmentStack {
 	
-	private Deque<Environment> stack;
+	private Stack<Environment> stack;
 	
 	public EnvironmentStack() {
-		stack = new ArrayDeque<Environment>();
-		stack.addFirst(new Environment());
+		stack = new Stack<Environment>();
+		stack.push(new Environment());
 	}
 	
 	public Environment getCurrent() {
-		return stack.peekFirst();
+		return stack.peek();
 	}
 	
 	public void enterScope(Environment.Type type) {
 		Environment env = new Environment(getCurrent(), type);
-		stack.addFirst(env);
+		stack.push(env);
 	}
 	
 	public void exitScope() {
-		stack.removeFirst();
+		stack.pop();
 	}
 	
 	public void resetEnvironment(Environment env) {
 		stack.clear();
-		stack.addFirst(env);
+		stack.push(env);
 	}
 	
 	@Override
