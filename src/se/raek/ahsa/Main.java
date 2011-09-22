@@ -24,6 +24,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		if (args.length != 1) {
 			System.out.println("Syntax: ahsa <filename>");
+			return;
 		}
 		
 		Environment env = new Environment();
