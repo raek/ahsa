@@ -187,7 +187,7 @@ break_statement returns [Statement stmt]
   ;
 
 return_statement returns [Statement stmt]
-  : 'return' expression ';' { $stmt = makeReturn($expression.expr); } ;
+  : 'return' e=expression? ';' { $stmt = makeReturn(($e.expr == null) ? makeConstant(makeNull()) : $e.expr); } ;
 
 block returns [List<Statement> stmts]
   : '{'        { envStack.enterScope(Environment.Type.BLOCK); }
