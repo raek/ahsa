@@ -20,6 +20,7 @@ import se.raek.ahsa.runtime.ControlAction;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
 import se.raek.ahsa.runtime.Function;
+import se.raek.ahsa.runtime.Box;
 
 import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
@@ -468,6 +469,11 @@ public class InterpreterTest {
 	public void typeNameFunction() {
 		assertEquals("function", Interpreter.typeName(makeFunction(BuiltInFunctions.print)));
 	}
+
+	@Test
+	public void typeNameBox() {
+		assertEquals("box", Interpreter.typeName(makeBox(new Box(makeNull()))));;
+	}
 	
 	@Test
 	public void isTruthyNull() {
@@ -502,6 +508,11 @@ public class InterpreterTest {
 	@Test
 	public void isTruthyFunction() {
 		assertTrue(Interpreter.isTruthy(makeFunction(BuiltInFunctions.print)));
+	}
+	
+	@Test
+	public void isTruthyBox() {
+		assertTrue(Interpreter.isTruthy(makeBox(new Box(makeNull()))));
 	}
 
 }

@@ -12,6 +12,7 @@ import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Box;
 import se.raek.ahsa.runtime.Function;
 import se.raek.ahsa.runtime.Value;
 
@@ -173,6 +174,11 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		});
 		right.matchExpression(this);
 		writer.print(")");
+		return null;
+	}
+
+	public Void caseBox(Box box) {
+		writer.printf("#<box%d>", box.id);
 		return null;
 	}
 

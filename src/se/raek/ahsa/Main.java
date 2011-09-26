@@ -30,6 +30,9 @@ public class Main {
 		Environment env = new Environment();
 		Store sto = new Store();
 		addFunction(env, sto, "print", BuiltInFunctions.print);
+		addFunction(env, sto, "box", BuiltInFunctions.box);
+		addFunction(env, sto, "box_get", BuiltInFunctions.boxGet);
+		addFunction(env, sto, "box_set", BuiltInFunctions.boxSet);
 		
 		CharStream input = new ANTLRFileStream(args[0]);
 		AhsaLexer lexer = new AhsaLexer(input);

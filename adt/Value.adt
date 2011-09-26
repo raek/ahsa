@@ -4,4 +4,5 @@
   (Null)
   (Boolean (boolean b))
   (Number (double n))
-  (Function (se.raek.ahsa.runtime.Function fn)))
+  (Function (se.raek.ahsa.runtime.Function fn))
+  (Box (se.raek.ahsa.runtime.Box box)))
