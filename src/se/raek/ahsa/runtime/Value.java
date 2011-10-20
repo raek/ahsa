@@ -13,6 +13,7 @@ public abstract class Value {
 		T caseBoolean(boolean b);
 		T caseNumber(double n);
 		T caseFunction(se.raek.ahsa.runtime.Function fn);
+		T caseId(se.raek.ahsa.runtime.Id id);
 		T caseBox(se.raek.ahsa.runtime.Box box);
 	}
 
@@ -33,6 +34,10 @@ public abstract class Value {
 		}
 
 		public T caseFunction(se.raek.ahsa.runtime.Function fn) {
+			return otherwise();
+		}
+
+		public T caseId(se.raek.ahsa.runtime.Id id) {
 			return otherwise();
 		}
 
@@ -62,6 +67,10 @@ public abstract class Value {
 
 	public static Value makeFunction(se.raek.ahsa.runtime.Function fn) {
 		return new Function(fn);
+	}
+
+	public static Value makeId(se.raek.ahsa.runtime.Id id) {
+		return new Id(id);
 	}
 
 	public static Value makeBox(se.raek.ahsa.runtime.Box box) {
@@ -176,6 +185,40 @@ public abstract class Value {
 		@Override
 		public String toString() {
 			return "Function(" + fn + ")";
+		}
+
+	}
+
+	private static final class Id extends Value {
+
+		private final se.raek.ahsa.runtime.Id id;
+
+		public Id(se.raek.ahsa.runtime.Id id) {
+			if (id == null) throw new NullPointerException();
+			this.id = id;
+		}
+
+		@Override
+		public <T> T matchValue(Matcher<T> m) {
+			return m.caseId(id);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Id)) return false;
+			Id other = (Id) otherObject;
+			return (id.equals(other.id));
+		}
+
+		@Override
+		public int hashCode() {
+			return id.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Id(" + id + ")";
 		}
 
 	}

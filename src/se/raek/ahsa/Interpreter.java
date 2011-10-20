@@ -11,9 +11,11 @@ import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Box;
 import se.raek.ahsa.runtime.CompoundFunction;
 import se.raek.ahsa.runtime.ControlAction;
 import se.raek.ahsa.runtime.Function;
+import se.raek.ahsa.runtime.Id;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
 
@@ -78,6 +80,12 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			public String caseFunction(Function fn) {
 				return "function";
 			}
+			public String caseId(Id id) {
+				return "id";
+			}
+			public String caseBox(Box box) {
+				return "box";
+			}
 		});
 	}
 	
@@ -99,6 +107,17 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			}
 			public Function otherwise() {
 				throw new CastException("function", typeName(v));
+			}
+		});
+	}
+	
+	public static Box castToBox(final Value v) {
+		return v.matchValue(new Value.AbstractMatcher<Box>() {
+			public Box caseBox(Box box) {
+				return box;
+			}
+			public Box otherwise() {
+				throw new CastException("box", typeName(v));
 			}
 		});
 	}

@@ -20,6 +20,7 @@ import se.raek.ahsa.runtime.ControlAction;
 import se.raek.ahsa.runtime.Store;
 import se.raek.ahsa.runtime.Value;
 import se.raek.ahsa.runtime.Function;
+import se.raek.ahsa.runtime.Id;
 import se.raek.ahsa.runtime.Box;
 
 import static se.raek.ahsa.ast.Expression.*;
@@ -449,6 +450,13 @@ public class InterpreterTest {
 		assertEquals(v0, sto.lookupVariable(varA));
 		assertEquals(v3, sto.lookupVariable(varB));
 	}
+	
+	@Test
+	public void idsNotEqual() {
+		Id id1 = new Id();
+		Id id2 = new Id();
+		assertFalse(id1.equals(id2));
+	}
 
 	@Test
 	public void typeNameNull() {
@@ -468,6 +476,11 @@ public class InterpreterTest {
 	@Test
 	public void typeNameFunction() {
 		assertEquals("function", Interpreter.typeName(makeFunction(BuiltInFunctions.print)));
+	}
+
+	@Test
+	public void typeNameId() {
+		assertEquals("id", Interpreter.typeName(makeId(new Id())));;
 	}
 
 	@Test
@@ -508,6 +521,11 @@ public class InterpreterTest {
 	@Test
 	public void isTruthyFunction() {
 		assertTrue(Interpreter.isTruthy(makeFunction(BuiltInFunctions.print)));
+	}
+	
+	@Test
+	public void isTruthyId() {
+		assertTrue(Interpreter.isTruthy(makeId(new Id())));
 	}
 	
 	@Test

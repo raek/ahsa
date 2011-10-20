@@ -16,6 +16,13 @@ public class BuiltInFunctions {
 		}
 	};
 	
+	public static final Function id = new AbstractFunctions.Function0() {
+		@Override
+		protected Value invoke() {
+			return Value.makeId(new Id());
+		}
+	};
+	
 	public static final Function box = new AbstractFunctions.Function1() {
 		@Override
 		protected Value invoke(Value v0) {

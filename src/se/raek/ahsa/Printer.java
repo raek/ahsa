@@ -14,6 +14,7 @@ import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
 import se.raek.ahsa.runtime.Box;
 import se.raek.ahsa.runtime.Function;
+import se.raek.ahsa.runtime.Id;
 import se.raek.ahsa.runtime.Value;
 
 public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, Statement.Matcher<Void> {
@@ -174,6 +175,11 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		});
 		right.matchExpression(this);
 		writer.print(")");
+		return null;
+	}
+
+	public Void caseId(Id id) {
+		writer.printf("#<id%d>", id.id);
 		return null;
 	}
 
