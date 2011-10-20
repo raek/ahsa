@@ -15,6 +15,7 @@ public abstract class Value {
 		T caseFunction(se.raek.ahsa.runtime.Function fn);
 		T caseId(se.raek.ahsa.runtime.Id id);
 		T caseBox(se.raek.ahsa.runtime.Box box);
+		T caseArray(se.raek.ahsa.runtime.Array array);
 	}
 
 	public static abstract class AbstractMatcher<T> implements Matcher<T> {
@@ -42,6 +43,10 @@ public abstract class Value {
 		}
 
 		public T caseBox(se.raek.ahsa.runtime.Box box) {
+			return otherwise();
+		}
+
+		public T caseArray(se.raek.ahsa.runtime.Array array) {
 			return otherwise();
 		}
 
@@ -75,6 +80,10 @@ public abstract class Value {
 
 	public static Value makeBox(se.raek.ahsa.runtime.Box box) {
 		return new Box(box);
+	}
+
+	public static Value makeArray(se.raek.ahsa.runtime.Array array) {
+		return new Array(array);
 	}
 
 	private static final class Null extends Value {
@@ -253,6 +262,40 @@ public abstract class Value {
 		@Override
 		public String toString() {
 			return "Box(" + box + ")";
+		}
+
+	}
+
+	private static final class Array extends Value {
+
+		private final se.raek.ahsa.runtime.Array array;
+
+		public Array(se.raek.ahsa.runtime.Array array) {
+			if (array == null) throw new NullPointerException();
+			this.array = array;
+		}
+
+		@Override
+		public <T> T matchValue(Matcher<T> m) {
+			return m.caseArray(array);
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) return true;
+			if (!(otherObject instanceof Array)) return false;
+			Array other = (Array) otherObject;
+			return (array.equals(other.array));
+		}
+
+		@Override
+		public int hashCode() {
+			return array.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "Array(" + array + ")";
 		}
 
 	}

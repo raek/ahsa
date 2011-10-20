@@ -4,14 +4,15 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
+import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
-import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Array;
 import se.raek.ahsa.runtime.Box;
 import se.raek.ahsa.runtime.Function;
 import se.raek.ahsa.runtime.Id;
@@ -185,6 +186,11 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 
 	public Void caseBox(Box box) {
 		writer.printf("#<box%d>", box.id);
+		return null;
+	}
+
+	public Void caseArray(Array array) {
+		writer.printf("#<array%d>", array.id);
 		return null;
 	}
 

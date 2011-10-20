@@ -1,6 +1,8 @@
 package se.raek.ahsa.runtime;
 
-import se.raek.ahsa.Interpreter;
+import static se.raek.ahsa.Interpreter.castToArray;
+import static se.raek.ahsa.Interpreter.castToBox;
+import static se.raek.ahsa.Interpreter.castToInt;
 import se.raek.ahsa.Printer;
 
 public class BuiltInFunctions {
@@ -33,15 +35,44 @@ public class BuiltInFunctions {
 	public static final Function boxGet = new AbstractFunctions.Function1() {
 		@Override
 		protected Value invoke(Value v0) {
-			return Interpreter.castToBox(v0).deref();
+			return castToBox(v0).deref();
 		}
 	};
 	
 	public static final Function boxSet = new AbstractFunctions.Function2() {
 		@Override
 		protected Value invoke(Value v0, Value v1) {
-			Interpreter.castToBox(v0).assign(v1);
+			castToBox(v0).assign(v1);
 			return Value.makeNull();
+		}
+	};
+
+	public static final Function array = new AbstractFunctions.Function1() {
+		@Override
+		protected Value invoke(Value v0) {
+			return Value.makeArray(new Array(castToInt(v0)));
+		}
+	};
+
+	public static final Function arrayGet = new AbstractFunctions.Function2() {
+		@Override
+		protected Value invoke(Value v0, Value v1) {
+			return castToArray(v0).subscript(castToInt(v1));
+		}
+	};
+
+	public static final Function arraySet = new AbstractFunctions.Function3() {
+		@Override
+		protected Value invoke(Value v0, Value v1, Value v2) {
+			castToArray(v0).assignSubscript(castToInt(v1), v2);
+			return Value.makeNull();
+		}
+	};
+
+	public static final Function arrayLength = new AbstractFunctions.Function1() {
+		@Override
+		protected Value invoke(Value v0) {
+			return Value.makeNumber(castToArray(v0).getLength());
 		}
 	};
 

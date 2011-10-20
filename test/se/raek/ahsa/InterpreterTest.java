@@ -533,4 +533,19 @@ public class InterpreterTest {
 		assertTrue(Interpreter.isTruthy(makeBox(new Box(makeNull()))));
 	}
 
+	@Test
+	public void castToInt() {
+		assertEquals(123, Interpreter.castToInt(makeNumber(123.0)));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void castToIntNonZeroFractionalPart() {
+		 Interpreter.castToInt(makeNumber(123.5));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void castToIntOutOfRange() {
+		 Interpreter.castToInt(makeNumber(Integer.MAX_VALUE + 1l));
+	}
+
 }

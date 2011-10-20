@@ -6,4 +6,5 @@
   (Number (double n))
   (Function (se.raek.ahsa.runtime.Function fn))
   (Id (se.raek.ahsa.runtime.Id id))
-  (Box (se.raek.ahsa.runtime.Box box)))
+  (Box (se.raek.ahsa.runtime.Box box))
+  (Array (se.raek.ahsa.runtime.Array array)))

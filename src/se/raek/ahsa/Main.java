@@ -1,6 +1,7 @@
 package se.raek.ahsa;
 
 import java.util.List;
+
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.parser.AhsaLexer;
 import se.raek.ahsa.parser.AhsaParser;
@@ -34,7 +35,11 @@ public class Main {
 		addFunction(env, sto, "box", BuiltInFunctions.box);
 		addFunction(env, sto, "box_get", BuiltInFunctions.boxGet);
 		addFunction(env, sto, "box_set", BuiltInFunctions.boxSet);
-		
+		addFunction(env, sto, "array", BuiltInFunctions.array);
+		addFunction(env, sto, "array_get", BuiltInFunctions.arrayGet);
+		addFunction(env, sto, "array_set", BuiltInFunctions.arraySet);
+		addFunction(env, sto, "array_length", BuiltInFunctions.arrayLength);
+
 		CharStream input = new ANTLRFileStream(args[0]);
 		AhsaLexer lexer = new AhsaLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);

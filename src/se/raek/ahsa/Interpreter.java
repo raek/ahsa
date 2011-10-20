@@ -3,14 +3,15 @@ package se.raek.ahsa;
 import java.util.ArrayList;
 import java.util.List;
 
+import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
-import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.runtime.Array;
 import se.raek.ahsa.runtime.Box;
 import se.raek.ahsa.runtime.CompoundFunction;
 import se.raek.ahsa.runtime.ControlAction;
@@ -86,6 +87,9 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			public String caseBox(Box box) {
 				return "box";
 			}
+			public String caseArray(Array array) {
+				return "array";
+			}
 		});
 	}
 	
@@ -99,7 +103,17 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			}
 		});
 	}
-	
+	public static int castToInt(Value v) {
+		double d = castToNumber(v);
+		long l = (long) d;
+		if (l != d)
+			throw new IllegalArgumentException("Number used as int must not have a fractional part: " + d);
+		int i = (int) l;
+		if (i != l)
+			throw new IllegalArgumentException("Number used as int must fit in an int: " + l);
+		return i;
+	}
+
 	public static Function castToFunction(final Value v) {
 		return v.matchValue(new Value.AbstractMatcher<Function>() {
 			public Function caseFunction(Function fn) {
@@ -121,7 +135,18 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 			}
 		});
 	}
-	
+
+	public static Array castToArray(final Value v) {
+		return v.matchValue(new Value.AbstractMatcher<Array>() {
+			public Array caseArray(Array array) {
+				return array;
+			}
+			public Array otherwise() {
+				throw new CastException("array", typeName(v));
+			}
+		});
+	}
+
 	public static boolean isTruthy(final Value v) {
 		return v.matchValue(new Value.AbstractMatcher<Boolean>() {
 			public Boolean caseNull() {
