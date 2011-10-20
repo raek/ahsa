@@ -23,7 +23,7 @@ public class AbstractFunctions {
 		
 		public final Value apply(List<Value> parameters) {
 			int n = parameters.size();
-			if (n != 1) throw new Function.ArityException(0, 1);
+			if (n != 1) throw new Function.ArityException(1, n);
 			return invoke(parameters.get(0));
 		}
 		
@@ -35,7 +35,7 @@ public class AbstractFunctions {
 		
 		public final Value apply(List<Value> parameters) {
 			int n = parameters.size();
-			if (n != 2) throw new Function.ArityException(0, 2);
+			if (n != 2) throw new Function.ArityException(2, n);
 			return invoke(parameters.get(0), parameters.get(1));
 		}
 		
@@ -47,7 +47,7 @@ public class AbstractFunctions {
 		
 		public final Value apply(List<Value> parameters) {
 			int n = parameters.size();
-			if (n != 3) throw new Function.ArityException(0, 3);
+			if (n != 3) throw new Function.ArityException(3, n);
 			return invoke(parameters.get(0), parameters.get(1), parameters.get(2));
 		}
 		
