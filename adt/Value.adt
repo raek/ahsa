@@ -1,10 +1,10 @@
-(package se.raek.ahsa.runtime)
+(package se.raek.ahsa.interpreter)
 
 (defadt Value
   (Null)
   (Boolean (boolean b))
   (Number (double n))
-  (Function (se.raek.ahsa.runtime.Function fn))
-  (Id (se.raek.ahsa.runtime.Id id))
-  (Box (se.raek.ahsa.runtime.Box box))
-  (Array (se.raek.ahsa.runtime.Array array)))
+  (Function (se.raek.ahsa.interpreter.Function fn))
+  (Id (se.raek.ahsa.interpreter.Id id))
+  (Box (se.raek.ahsa.interpreter.Box box))
+  (Array (se.raek.ahsa.interpreter.Array array)))

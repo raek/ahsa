@@ -1,4 +1,4 @@
-package se.raek.ahsa;
+package se.raek.ahsa.interpreter;
 
 import static org.junit.Assert.*;
 
@@ -12,13 +12,14 @@ import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.interpreter.Printer;
 
 import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
 import static se.raek.ahsa.ast.EqualityOperator.*;
 import static se.raek.ahsa.ast.RelationalOperator.*;
 import static se.raek.ahsa.ast.Statement.*;
-import static se.raek.ahsa.runtime.Value.*;
+import static se.raek.ahsa.ast.Literal.*;
 
 public class PrinterTest {
 

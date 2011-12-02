@@ -1,13 +1,12 @@
-package se.raek.ahsa.runtime;
+package se.raek.ahsa.interpreter;
 
 import java.util.Iterator;
 import java.util.List;
 
-import se.raek.ahsa.Interpreter;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
-import se.raek.ahsa.runtime.ControlAction.Matcher;
+import se.raek.ahsa.interpreter.ControlAction.Matcher;
 
 public class CompoundFunction implements Function {
 	

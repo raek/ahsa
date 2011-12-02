@@ -1,4 +1,4 @@
-package se.raek.ahsa;
+package se.raek.ahsa.interpreter;
 
 import static org.junit.Assert.*;
 
@@ -8,46 +8,52 @@ import java.util.List;
 
 import org.junit.Test;
 
-import se.raek.ahsa.Interpreter.CastException;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.Literal;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
-import se.raek.ahsa.runtime.BuiltInFunctions;
-import se.raek.ahsa.runtime.CompoundFunction;
-import se.raek.ahsa.runtime.ControlAction;
-import se.raek.ahsa.runtime.Store;
-import se.raek.ahsa.runtime.Value;
-import se.raek.ahsa.runtime.Function;
-import se.raek.ahsa.runtime.Id;
-import se.raek.ahsa.runtime.Box;
+import se.raek.ahsa.interpreter.Box;
+import se.raek.ahsa.interpreter.BuiltInFunctions;
+import se.raek.ahsa.interpreter.CompoundFunction;
+import se.raek.ahsa.interpreter.ControlAction;
+import se.raek.ahsa.interpreter.Function;
+import se.raek.ahsa.interpreter.Id;
+import se.raek.ahsa.interpreter.Interpreter;
+import se.raek.ahsa.interpreter.Store;
+import se.raek.ahsa.interpreter.Value;
+import se.raek.ahsa.interpreter.Interpreter.CastException;
 
 import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
 import static se.raek.ahsa.ast.EqualityOperator.*;
 import static se.raek.ahsa.ast.RelationalOperator.*;
 import static se.raek.ahsa.ast.Statement.*;
-import static se.raek.ahsa.runtime.Value.*;
+import static se.raek.ahsa.interpreter.Value.*;
 
 public class InterpreterTest {
 
-	private final static Value v0 = makeNumber(0.0);
-	private final static Value v1 = makeNumber(1.0);
-	private final static Value v2 = makeNumber(2.0);
-	private final static Value v3 = makeNumber(3.0);
-	private final static Expression c0 = makeConstant(v0);
-	private final static Expression c1 = makeConstant(v1);
-	private final static Expression c2 = makeConstant(v2);
-	private final static Expression c3 = makeConstant(v3);
-	private final static Expression c6 = makeConstant(makeNumber(6.0));
-	private final static Expression cNull = makeConstant(makeNull());
+	private final static Value v0 = Value.makeNumber(0.0);
+	private final static Value v1 = Value.makeNumber(1.0);
+	private final static Value v2 = Value.makeNumber(2.0);
+	private final static Value v3 = Value.makeNumber(3.0);
+	private final static Literal l0 = Literal.makeNumber(0.0);
+	private final static Literal l1 = Literal.makeNumber(1.0);
+	private final static Literal l2 = Literal.makeNumber(2.0);
+	private final static Literal l3 = Literal.makeNumber(3.0);
+	private final static Expression c0 = makeConstant(l0);
+	private final static Expression c1 = makeConstant(l1);
+	private final static Expression c2 = makeConstant(l2);
+	private final static Expression c3 = makeConstant(l3);
+	private final static Expression c6 = makeConstant(Literal.makeNumber(6.0));
+	private final static Expression cNull = makeConstant(Literal.makeNull());
 	private final static ValueLocation valX = new ValueLocation("x");
 	private final static VariableLocation varY = new VariableLocation("y");
 
 	@Test
 	public void evalConstant() {
-		assertEquals(v1, Interpreter.eval(makeConstant(v1), null));
+		assertEquals(v1, Interpreter.eval(makeConstant(l1), null));
 	}
 
 	@Test
@@ -210,11 +216,11 @@ public class InterpreterTest {
 
 	@Test
 	public void executeConditionalTrue() {
-		Expression c0 = makeConstant(makeNumber(0.0));
+		Expression c0 = makeConstant(Literal.makeNumber(0.0));
 		Expression lookupX = makeValueLookup(valX);
 		Store sto = new Store(null);
 		List<Statement> stmts = new ArrayList<Statement>();
-		stmts.add(makeValueDefinition(valX, makeConstant(makeNumber(2.0))));
+		stmts.add(makeValueDefinition(valX, makeConstant(Literal.makeNumber(2.0))));
 		Expression cond = makeRelationalOperation(GREATER_EQUAL, lookupX, c0);
 		Statement thenStmt = makeVariableAssignment(varY, lookupX);
 		Statement elseStmt = makeVariableAssignment(varY,
@@ -227,11 +233,11 @@ public class InterpreterTest {
 
 	@Test
 	public void executeConditionalFalse() {
-		Expression c0 = makeConstant(makeNumber(0.0));
+		Expression c0 = makeConstant(Literal.makeNumber(0.0));
 		Expression lookupX = makeValueLookup(valX);
 		Store sto = new Store(null);
 		List<Statement> stmts = new ArrayList<Statement>();
-		stmts.add(makeValueDefinition(valX, makeConstant(makeNumber(-2.0))));
+		stmts.add(makeValueDefinition(valX, makeConstant(Literal.makeNumber(-2.0))));
 		Expression cond = makeRelationalOperation(GREATER_EQUAL, lookupX, c0);
 		Statement thenStmt = makeVariableAssignment(varY, lookupX);
 		Statement elseStmt = makeVariableAssignment(varY,

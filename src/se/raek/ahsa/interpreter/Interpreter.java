@@ -1,4 +1,4 @@
-package se.raek.ahsa;
+package se.raek.ahsa.interpreter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,19 +6,12 @@ import java.util.List;
 import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.Literal;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
-import se.raek.ahsa.runtime.Array;
-import se.raek.ahsa.runtime.Box;
-import se.raek.ahsa.runtime.CompoundFunction;
-import se.raek.ahsa.runtime.ControlAction;
-import se.raek.ahsa.runtime.Function;
-import se.raek.ahsa.runtime.Id;
-import se.raek.ahsa.runtime.Store;
-import se.raek.ahsa.runtime.Value;
 
 public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher<ControlAction> {
 	
@@ -198,8 +191,18 @@ public class Interpreter implements Expression.Matcher<Value>, Statement.Matcher
 		return ControlAction.makeNext();
 	}
 
-	public Value caseConstant(Value v) {
-		return v;
+	public Value caseConstant(Literal l) {
+		return l.matchLiteral(new Literal.Matcher<Value>() {
+			public Value caseNull() {
+				return Value.makeNull();
+			}
+			public Value caseBoolean(boolean b) {
+				return Value.makeBoolean(b);
+			}
+			public Value caseNumber(double n) {
+				return Value.makeNumber(n);
+			}
+		});
 	}
 
 	public Value caseValueLookup(ValueLocation val) {

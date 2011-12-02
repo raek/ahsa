@@ -1,4 +1,4 @@
-package se.raek.ahsa;
+package se.raek.ahsa.interpreter;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -7,18 +7,14 @@ import java.util.List;
 import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.Expression;
+import se.raek.ahsa.ast.Literal;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
-import se.raek.ahsa.runtime.Array;
-import se.raek.ahsa.runtime.Box;
-import se.raek.ahsa.runtime.Function;
-import se.raek.ahsa.runtime.Id;
-import se.raek.ahsa.runtime.Value;
 
-public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, Statement.Matcher<Void> {
+public class Printer implements Literal.Matcher<Void>, Value.Matcher<Void>, Expression.Matcher<Void>, Statement.Matcher<Void> {
 	
 	private final PrintWriter writer;
 	
@@ -26,9 +22,14 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		this.writer = writer;
 	}
 	
-	public static void print(Value expr, PrintWriter writer) {
+	public static void print(Literal l, PrintWriter writer) {
 		Printer printer = new Printer(writer);
-		expr.matchValue(printer);
+		l.matchLiteral(printer);
+	}
+	
+	public static void print(Value v, PrintWriter writer) {
+		Printer printer = new Printer(writer);
+		v.matchValue(printer);
 	}
 	
 	public static void print(Expression expr, PrintWriter writer) {
@@ -46,6 +47,12 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		for (Statement stmt : stmts) {
 			stmt.matchStatement(printer);
 		}
+	}
+	
+	public static String toString(Literal l) {
+		StringWriter sw = new StringWriter();
+		print(l, new PrintWriter(sw));
+		return sw.toString();
 	}
 	
 	public static String toString(Value v) {
@@ -92,8 +99,23 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		return null;
 	}
 
-	public Void caseConstant(Value v) {
-		v.matchValue(this);
+	public Void caseId(Id id) {
+		writer.printf("#<id%d>", id.id);
+		return null;
+	}
+
+	public Void caseBox(Box box) {
+		writer.printf("#<box%d>", box.id);
+		return null;
+	}
+
+	public Void caseArray(Array array) {
+		writer.printf("#<array%d>", array.id);
+		return null;
+	}
+
+	public Void caseConstant(Literal l) {
+		l.matchLiteral(this);
 		return null;
 	}
 
@@ -176,21 +198,6 @@ public class Printer implements Value.Matcher<Void>, Expression.Matcher<Void>, S
 		});
 		right.matchExpression(this);
 		writer.print(")");
-		return null;
-	}
-
-	public Void caseId(Id id) {
-		writer.printf("#<id%d>", id.id);
-		return null;
-	}
-
-	public Void caseBox(Box box) {
-		writer.printf("#<box%d>", box.id);
-		return null;
-	}
-
-	public Void caseArray(Array array) {
-		writer.printf("#<array%d>", array.id);
 		return null;
 	}
 

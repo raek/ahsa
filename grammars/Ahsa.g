@@ -14,18 +14,18 @@ import se.raek.ahsa.ast.Statement;
 import se.raek.ahsa.ast.Expression;
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.ast.Literal;
 import se.raek.ahsa.ast.LoopLabel;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.ArithmeticOperator;
-import se.raek.ahsa.runtime.Value;
 
 import static se.raek.ahsa.ast.Expression.*;
 import static se.raek.ahsa.ast.ArithmeticOperator.*;
 import static se.raek.ahsa.ast.EqualityOperator.*;
 import static se.raek.ahsa.ast.RelationalOperator.*;
 import static se.raek.ahsa.ast.Statement.*;
-import static se.raek.ahsa.runtime.Value.*;
+import static se.raek.ahsa.ast.Literal.*;
 
 }
 
@@ -233,16 +233,16 @@ expr4 returns [Expression expr]
   ;
 
 expr5 returns [Expression expr]
-  : c=constant           { $expr = makeConstant($c.v); }
+  : c=constant           { $expr = makeConstant($c.l); }
   | l=lookup             { $expr = $l.expr; }
   | fn=lambda            { $expr = $fn.expr; }
   | '(' e=expression ')' { $expr = $e.expr; }
   ;
 
-constant returns [Value v]
-  : null_literal      { $v = makeNull(); }
-  | b=boolean_literal { $v = makeBoolean($b.b); }
-  | n=number_literal  { $v = makeNumber($n.n); }
+constant returns [Literal l]
+  : null_literal      { $l = makeNull(); }
+  | b=boolean_literal { $l = makeBoolean($b.b); }
+  | n=number_literal  { $l = makeNumber($n.n); }
   ;
 
 lookup returns [Expression expr]

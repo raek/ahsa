@@ -1,4 +1,4 @@
-package se.raek.ahsa.runtime;
+package se.raek.ahsa.interpreter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

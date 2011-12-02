@@ -3,13 +3,14 @@ package se.raek.ahsa;
 import java.util.List;
 
 import se.raek.ahsa.ast.Statement;
+import se.raek.ahsa.interpreter.BuiltInFunctions;
+import se.raek.ahsa.interpreter.Function;
+import se.raek.ahsa.interpreter.Interpreter;
+import se.raek.ahsa.interpreter.Store;
+import se.raek.ahsa.interpreter.Value;
 import se.raek.ahsa.parser.AhsaLexer;
 import se.raek.ahsa.parser.AhsaParser;
 import se.raek.ahsa.parser.Environment;
-import se.raek.ahsa.runtime.BuiltInFunctions;
-import se.raek.ahsa.runtime.Function;
-import se.raek.ahsa.runtime.Store;
-import se.raek.ahsa.runtime.Value;
 import org.antlr.runtime.*;
 
 public class Main {

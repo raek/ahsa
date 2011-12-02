@@ -7,12 +7,12 @@
 (import se.raek.ahsa.ast.EqualityOperator)
 (import se.raek.ahsa.ast.RelationalOperator)
 (import se.raek.ahsa.ast.Statement)
-(import se.raek.ahsa.runtime.Value)
+(import se.raek.ahsa.ast.Literal)
 
 (defadt Expression
-  (Constant (Value v))
+  (Constant (Literal l))
   (ValueLookup (ValueLocation val))
-  (VariableLookup (VariableLocation val))
+  (VariableLookup (VariableLocation var))
   (ArithmeticOperation (ArithmeticOperator op)
                        (Expression left)
                        (Expression right))

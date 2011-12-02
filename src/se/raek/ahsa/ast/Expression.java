@@ -7,7 +7,7 @@ import se.raek.ahsa.ast.ArithmeticOperator;
 import se.raek.ahsa.ast.EqualityOperator;
 import se.raek.ahsa.ast.RelationalOperator;
 import se.raek.ahsa.ast.Statement;
-import se.raek.ahsa.runtime.Value;
+import se.raek.ahsa.ast.Literal;
 
 public abstract class Expression {
 
@@ -17,9 +17,9 @@ public abstract class Expression {
 	public abstract <T> T matchExpression(Matcher<T> m);
 
 	public interface Matcher<T> {
-		T caseConstant(Value v);
+		T caseConstant(Literal l);
 		T caseValueLookup(ValueLocation val);
-		T caseVariableLookup(VariableLocation val);
+		T caseVariableLookup(VariableLocation var);
 		T caseArithmeticOperation(ArithmeticOperator op, Expression left, Expression right);
 		T caseEqualityOperation(EqualityOperator op, Expression left, Expression right);
 		T caseRelationalOperation(RelationalOperator op, Expression left, Expression right);
@@ -31,7 +31,7 @@ public abstract class Expression {
 
 		public abstract T otherwise();
 
-		public T caseConstant(Value v) {
+		public T caseConstant(Literal l) {
 			return otherwise();
 		}
 
@@ -39,7 +39,7 @@ public abstract class Expression {
 			return otherwise();
 		}
 
-		public T caseVariableLookup(VariableLocation val) {
+		public T caseVariableLookup(VariableLocation var) {
 			return otherwise();
 		}
 
@@ -65,16 +65,16 @@ public abstract class Expression {
 
 	}
 
-	public static Expression makeConstant(Value v) {
-		return new Constant(v);
+	public static Expression makeConstant(Literal l) {
+		return new Constant(l);
 	}
 
 	public static Expression makeValueLookup(ValueLocation val) {
 		return new ValueLookup(val);
 	}
 
-	public static Expression makeVariableLookup(VariableLocation val) {
-		return new VariableLookup(val);
+	public static Expression makeVariableLookup(VariableLocation var) {
+		return new VariableLookup(var);
 	}
 
 	public static Expression makeArithmeticOperation(ArithmeticOperator op, Expression left, Expression right) {
@@ -99,16 +99,16 @@ public abstract class Expression {
 
 	private static final class Constant extends Expression {
 
-		private final Value v;
+		private final Literal l;
 
-		public Constant(Value v) {
-			if (v == null) throw new NullPointerException();
-			this.v = v;
+		public Constant(Literal l) {
+			if (l == null) throw new NullPointerException();
+			this.l = l;
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseConstant(v);
+			return m.caseConstant(l);
 		}
 
 		@Override
@@ -116,17 +116,17 @@ public abstract class Expression {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof Constant)) return false;
 			Constant other = (Constant) otherObject;
-			return (v.equals(other.v));
+			return (l.equals(other.l));
 		}
 
 		@Override
 		public int hashCode() {
-			return v.hashCode();
+			return l.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return "Constant(" + v + ")";
+			return "Constant(" + l + ")";
 		}
 
 	}
@@ -167,16 +167,16 @@ public abstract class Expression {
 
 	private static final class VariableLookup extends Expression {
 
-		private final VariableLocation val;
+		private final VariableLocation var;
 
-		public VariableLookup(VariableLocation val) {
-			if (val == null) throw new NullPointerException();
-			this.val = val;
+		public VariableLookup(VariableLocation var) {
+			if (var == null) throw new NullPointerException();
+			this.var = var;
 		}
 
 		@Override
 		public <T> T matchExpression(Matcher<T> m) {
-			return m.caseVariableLookup(val);
+			return m.caseVariableLookup(var);
 		}
 
 		@Override
@@ -184,17 +184,17 @@ public abstract class Expression {
 			if (this == otherObject) return true;
 			if (!(otherObject instanceof VariableLookup)) return false;
 			VariableLookup other = (VariableLookup) otherObject;
-			return (val.equals(other.val));
+			return (var.equals(other.var));
 		}
 
 		@Override
 		public int hashCode() {
-			return val.hashCode();
+			return var.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return "VariableLookup(" + val + ")";
+			return "VariableLookup(" + var + ")";
 		}
 
 	}

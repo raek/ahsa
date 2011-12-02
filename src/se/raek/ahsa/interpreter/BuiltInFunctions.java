@@ -1,9 +1,8 @@
-package se.raek.ahsa.runtime;
+package se.raek.ahsa.interpreter;
 
-import static se.raek.ahsa.Interpreter.castToArray;
-import static se.raek.ahsa.Interpreter.castToBox;
-import static se.raek.ahsa.Interpreter.castToInt;
-import se.raek.ahsa.Printer;
+import static se.raek.ahsa.interpreter.Interpreter.castToArray;
+import static se.raek.ahsa.interpreter.Interpreter.castToBox;
+import static se.raek.ahsa.interpreter.Interpreter.castToInt;
 
 public class BuiltInFunctions {
 	

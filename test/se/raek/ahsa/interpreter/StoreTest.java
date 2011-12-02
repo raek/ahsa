@@ -1,4 +1,4 @@
-package se.raek.ahsa.runtime;
+package se.raek.ahsa.interpreter;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import se.raek.ahsa.ast.ValueLocation;
 import se.raek.ahsa.ast.VariableLocation;
+import se.raek.ahsa.interpreter.Store;
+import se.raek.ahsa.interpreter.Value;
 
 public class StoreTest {
 	

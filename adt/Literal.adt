@@ -1,0 +1,6 @@
+(package se.raek.ahsa.ast)
+
+(defadt Literal
+  (Null)
+  (Boolean (boolean b))
+  (Number (double n)))

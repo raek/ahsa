@@ -1,4 +1,4 @@
-package se.raek.ahsa.runtime;
+package se.raek.ahsa.interpreter;
 
 
 public abstract class Value {
@@ -12,10 +12,10 @@ public abstract class Value {
 		T caseNull();
 		T caseBoolean(boolean b);
 		T caseNumber(double n);
-		T caseFunction(se.raek.ahsa.runtime.Function fn);
-		T caseId(se.raek.ahsa.runtime.Id id);
-		T caseBox(se.raek.ahsa.runtime.Box box);
-		T caseArray(se.raek.ahsa.runtime.Array array);
+		T caseFunction(se.raek.ahsa.interpreter.Function fn);
+		T caseId(se.raek.ahsa.interpreter.Id id);
+		T caseBox(se.raek.ahsa.interpreter.Box box);
+		T caseArray(se.raek.ahsa.interpreter.Array array);
 	}
 
 	public static abstract class AbstractMatcher<T> implements Matcher<T> {
@@ -34,19 +34,19 @@ public abstract class Value {
 			return otherwise();
 		}
 
-		public T caseFunction(se.raek.ahsa.runtime.Function fn) {
+		public T caseFunction(se.raek.ahsa.interpreter.Function fn) {
 			return otherwise();
 		}
 
-		public T caseId(se.raek.ahsa.runtime.Id id) {
+		public T caseId(se.raek.ahsa.interpreter.Id id) {
 			return otherwise();
 		}
 
-		public T caseBox(se.raek.ahsa.runtime.Box box) {
+		public T caseBox(se.raek.ahsa.interpreter.Box box) {
 			return otherwise();
 		}
 
-		public T caseArray(se.raek.ahsa.runtime.Array array) {
+		public T caseArray(se.raek.ahsa.interpreter.Array array) {
 			return otherwise();
 		}
 
@@ -70,19 +70,19 @@ public abstract class Value {
 		return new Number(n);
 	}
 
-	public static Value makeFunction(se.raek.ahsa.runtime.Function fn) {
+	public static Value makeFunction(se.raek.ahsa.interpreter.Function fn) {
 		return new Function(fn);
 	}
 
-	public static Value makeId(se.raek.ahsa.runtime.Id id) {
+	public static Value makeId(se.raek.ahsa.interpreter.Id id) {
 		return new Id(id);
 	}
 
-	public static Value makeBox(se.raek.ahsa.runtime.Box box) {
+	public static Value makeBox(se.raek.ahsa.interpreter.Box box) {
 		return new Box(box);
 	}
 
-	public static Value makeArray(se.raek.ahsa.runtime.Array array) {
+	public static Value makeArray(se.raek.ahsa.interpreter.Array array) {
 		return new Array(array);
 	}
 
@@ -166,9 +166,9 @@ public abstract class Value {
 
 	private static final class Function extends Value {
 
-		private final se.raek.ahsa.runtime.Function fn;
+		private final se.raek.ahsa.interpreter.Function fn;
 
-		public Function(se.raek.ahsa.runtime.Function fn) {
+		public Function(se.raek.ahsa.interpreter.Function fn) {
 			if (fn == null) throw new NullPointerException();
 			this.fn = fn;
 		}
@@ -200,9 +200,9 @@ public abstract class Value {
 
 	private static final class Id extends Value {
 
-		private final se.raek.ahsa.runtime.Id id;
+		private final se.raek.ahsa.interpreter.Id id;
 
-		public Id(se.raek.ahsa.runtime.Id id) {
+		public Id(se.raek.ahsa.interpreter.Id id) {
 			if (id == null) throw new NullPointerException();
 			this.id = id;
 		}
@@ -234,9 +234,9 @@ public abstract class Value {
 
 	private static final class Box extends Value {
 
-		private final se.raek.ahsa.runtime.Box box;
+		private final se.raek.ahsa.interpreter.Box box;
 
-		public Box(se.raek.ahsa.runtime.Box box) {
+		public Box(se.raek.ahsa.interpreter.Box box) {
 			if (box == null) throw new NullPointerException();
 			this.box = box;
 		}
@@ -268,9 +268,9 @@ public abstract class Value {
 
 	private static final class Array extends Value {
 
-		private final se.raek.ahsa.runtime.Array array;
+		private final se.raek.ahsa.interpreter.Array array;
 
-		public Array(se.raek.ahsa.runtime.Array array) {
+		public Array(se.raek.ahsa.interpreter.Array array) {
 			if (array == null) throw new NullPointerException();
 			this.array = array;
 		}
